@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.eebbk.bfc.demo.push">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name=".PushTestApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".flow.WholeFlowActivity" />
+        <activity android:name=".interfaceTest.InterFaceActivity" />
+        <activity android:name=".function.FunctionActivity" />
+        <activity android:name=".performance.PerformanceActivity" />
+        <activity android:name=".flow.DefaultFlowActivity" />
+        <activity android:name=".flow.CustomFlowActivity" />
+        <activity android:name=".flow.MessageShowActivity" />
+
+        <meta-data
+            android:name="SYNC_APPKEY"
+            android:value="983cbadb6dd7446e9704654b1d8e775a" />
+        <meta-data
+            android:name="SYNC_RID_TAG"
+            android:value="1" />
+
+        <receiver
+            android:name=".flow.MessageReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.eebbk.bfc.im.sync_response" />
+
+                <category android:name="com.eebbk.bfc.demo.push" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".interfaceTest.DebugValueSettingActivity"></activity>
+    </application>
+
+</manifest>
