@@ -38,7 +38,7 @@ public class HttpDNS {
             LogUtils.d("no cache host");
             return getIp(context, hostName);
         } else {
-            if (!host.getNetTag().equals(tag) || !host.getHostName().equals(hostName) || host.isExpired()) {
+            if (!TextUtils.equals(host.getNetTag(), tag) || !TextUtils.equals(host.getHostName(), hostName) || host.isExpired()) {
                 if (host.isExpired()) {
                     synchronized (hostCache) {
                         hostCache.remove(host.getHostName());
@@ -56,7 +56,7 @@ public class HttpDNS {
         String tag = NetUtil.getNetworkTag(context);
         HostObject host = hostCache.get(hostName);
         if (host != null) {
-            if (tag.equals(host.getNetTag()) && host.getHostName().equals(hostName) && !host.isExpired()) {
+            if (TextUtils.equals(tag, host.getNetTag()) && TextUtils.equals(host.getHostName(), hostName) && !host.isExpired()) {
                 return host.getIp();
             }
         }
@@ -74,7 +74,7 @@ public class HttpDNS {
         } finally {
             if (!TextUtils.isEmpty(ip)) {
                 int count = httpDnsCallSuccessCount.incrementAndGet();
-                LogUtils.i("increase httpdns call success count:" + count);
+                LogUtils.i("increase http dns call success count:" + count);
             }
         }
         return ip;

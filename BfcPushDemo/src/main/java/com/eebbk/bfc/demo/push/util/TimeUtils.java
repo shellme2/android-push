@@ -1,13 +1,13 @@
 package com.eebbk.bfc.demo.push.util;
 
-import android.util.Log;
+import com.eebbk.bfc.im.push.util.LogUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class TimeUtils {
-    private static final String TAG=TimeUtils.class.getName();
+    private static final String TAG = "TimeUtils";
 
     private TimeUtils(){}
 
@@ -17,7 +17,7 @@ public class TimeUtils {
     }
 
     public static String formatTime(Long time){
-        Log.d(TAG, "time: "+time);
+        LogUtils.d(TAG, "time: "+time);
         SimpleDateFormat format=new SimpleDateFormat("mm分ss秒SSS毫秒", Locale.CHINA);
         return format.format(new Date(time));
     }

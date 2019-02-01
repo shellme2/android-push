@@ -4,24 +4,27 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
-import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.util.IDUtil;
+import com.eebbk.bfc.common.devices.DeviceUtils;
 import com.eebbk.bfc.im.push.code.MD5Util;
+import com.eebbk.bfc.im.push.util.IDUtil;
+import com.eebbk.bfc.im.push.util.LogUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 /**
  * 手机设备信息获取类
  */
 public class PhoneDevice implements Device {
+    private static final String TAG = "PhoneDevice";
 
     private Context context;
 
@@ -46,26 +49,52 @@ public class PhoneDevice implements Device {
 
     @Override
     public String getScreenResolution() {
-        DisplayMetrics metric = new DisplayMetrics();
-        metric = context.getResources().getDisplayMetrics();
+        DisplayMetrics metric = context.getResources().getDisplayMetrics();
         String resolution = metric.widthPixels + "*" + metric.heightPixels;
         return resolution;
     }
 
     @Override
     public String getMacAddress() {
-        WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        WifiInfo info = wifi.getConnectionInfo();
         String mac = null;
-        if (info != null && info.getMacAddress() != null) {
-            mac = info.getMacAddress();
+
+        Enumeration<NetworkInterface> interfaces = null;
+        try {
+            interfaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            LogUtils.e(TAG, "获取Mac地址异常："+e);
+        }
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface iF = interfaces.nextElement();
+            byte[] addr = new byte[0];
+            try {
+                addr = iF.getHardwareAddress();
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
+            if (addr == null || addr.length == 0) {
+                continue;
+            }
+            StringBuilder buf = new StringBuilder();
+            for (byte b : addr) {
+                buf.append(String.format("%02X:", b));
+            }
+            if (buf.length() > 0) {
+                buf.deleteCharAt(buf.length() - 1);
+            }
+             mac = buf.toString();
         }
         return mac;
     }
 
     @Override
     public String getDeviceId() {
-        String deviceId = null;
+        String deviceId ;
+        // 如果有机器序列号的，用机器序列号作为DeviceId
+        deviceId = DeviceUtils.getMachineId(context);
+        if(!TextUtils.isEmpty(deviceId) && !TextUtils.equals(deviceId, DeviceUtils.DEFAULT_MACHINE_ID)){
+            return MD5Util.md5(0 + deviceId);
+        }
         String mac = getMacAddress();
         String imei = getImei();
         if (mac != null && imei != null) {
@@ -73,7 +102,11 @@ public class PhoneDevice implements Device {
             // randUUID)，randUUID由每个客户端生成（由于部分客户端无法得到mac和imei，因此只能自己生成唯一识别码）
             // 并保存在本地，建议多保存几个地方，避免被删除，当能获取到mac，imei信息时，不添加UUID。
             deviceId = MD5Util.md5(0 + mac + imei);
-        } else {
+        } else if(mac != null){
+            deviceId = MD5Util.md5(0 + mac);
+        } else if(imei != null){
+            deviceId = MD5Util.md5(0 + imei);
+        } else{
             deviceId = readDeviceId();
             if (TextUtils.isEmpty(deviceId)) {
                 deviceId = MD5Util.md5(IDUtil.getUUID());
@@ -87,13 +120,11 @@ public class PhoneDevice implements Device {
         DataStore dataStore = DataStore.getInstance(context);
         SharedPreferences.Editor editor = dataStore.edit();
         editor.putString(DEVICE_ID_KEY, deviceId);
-        editor.commit();
+        editor.apply();
     }
 
     /**
      * 清除保存在本地的deviceId
-     *
-     * @return
      */
     public boolean clearDeviceId() {
         DataStore dataStore = DataStore.getInstance(context);
@@ -127,7 +158,7 @@ public class PhoneDevice implements Device {
     }
 
     @Override
-    public String getBasebandVersion() {
+    public String getBaseBandVersion() {
         String result = null;
         try {
             Class<?> cl = Class.forName("android.os.SystemProperties");
@@ -149,31 +180,31 @@ public class PhoneDevice implements Device {
     }
 
     @Override
-    public String getBuildNumber() {
-        return Build.DISPLAY;
-    }
-
-    @Override
     public String getAppKeyFromMetaData() {
-        ApplicationInfo appInfo = null;
+        ApplicationInfo appInfo ;
         String appKey = null;
         try {
-            appInfo = context.getPackageManager().getApplicationInfo(
-                    context.getPackageName(), PackageManager.GET_META_DATA);
-            appKey = appInfo.metaData.getString("SYNC_APPKEY");
-            LogUtils.i("meta-data appkay:" + appKey);
-        } catch (PackageManager.NameNotFoundException e) {
-            LogUtils.e(e);
+            appInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            appKey = appInfo.metaData.getString("SYNC_APP_KEY");
+
+            LogUtils.i("meta-data app key:" + appKey);
+        } catch (Exception e) {
+            LogUtils.e(TAG, e);
         }
         if (appKey == null) {
-            LogUtils.e("appKey is null.");
+            LogUtils.e( TAG, "appKey is null.");
         }
         return appKey;
     }
 
     @Override
+    public String getBuildNumber() {
+        return Build.DISPLAY;
+    }
+
+    @Override
     public Integer getRidTagFromMetaData() {
-        ApplicationInfo appInfo = null;
+        ApplicationInfo appInfo ;
         Integer ridTag = null;
         try {
             appInfo = context.getPackageManager().getApplicationInfo(

@@ -1,12 +1,12 @@
 package com.eebbk.bfc.im.push.request;
 
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.entity.request.RequestEntity;
 import com.eebbk.bfc.im.push.listener.OnReceiveFinishListener;
 import com.eebbk.bfc.im.push.listener.OnReceiveListener;
-import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
 import com.eebbk.bfc.im.push.response.Response;
 import com.eebbk.bfc.im.push.util.IDUtil;
+import com.eebbk.bfc.im.push.util.LogUtils;
 import com.eebbk.bfc.im.push.util.RandomUtil;
 import com.eebbk.bfc.im.push.util.TimeFormatUtil;
 
@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 发送请求的基类，该类负责实现对应的协议请求
  */
 public class Request implements Cloneable {
+    private static final String TAG = "Request";
 
     /**
      * 请求发送的时间
@@ -31,7 +32,7 @@ public class Request implements Cloneable {
      */
     protected RequestEntity requestEntity;
 
-    protected SyncApplication app;
+    protected PushApplication app;
 
     /**
      * 请求回调监听
@@ -102,7 +103,7 @@ public class Request implements Cloneable {
      */
     protected boolean isMutiResponse;
 
-    Request(SyncApplication app, RequestEntity requestEntity) {
+    Request(PushApplication app, RequestEntity requestEntity) {
         this.app = app;
         this.requestEntity = requestEntity;
         this.isMutiResponse = false; // 默认请求只有一个响应
@@ -130,7 +131,6 @@ public class Request implements Cloneable {
 
     /**
      * 设置当前请求是否为多次响应请求
-     * @param isMutiResponse
      */
     public void setMutiResponse(boolean isMutiResponse) {
         this.isMutiResponse = isMutiResponse;
@@ -138,7 +138,6 @@ public class Request implements Cloneable {
 
     /**
      * 判断是否为多次响应请求
-     * @return
      */
     public boolean isMutiResponse() {
         return isMutiResponse;
@@ -202,8 +201,6 @@ public class Request implements Cloneable {
 
     /**
      * 设置请求响应超时时间，单位ms
-     *
-     * @param timeout
      */
     public void setTimeout(int timeout) {
         this.timeout = timeout;
@@ -238,7 +235,7 @@ public class Request implements Cloneable {
      */
     public void send() {
         if (requestEntity == null) {
-            LogUtils.e("request entity is null.");
+            LogUtils.e( TAG, "request entity is null.");
             return;
         }
         sendImpl();
@@ -268,11 +265,11 @@ public class Request implements Cloneable {
      */
     public static void  retryRequest(Request request) {
         if (request == null) {
-            throw new NullPointerException("reuest is null!");
+            throw new NullPointerException("retryRequest,request is null!");
         }
 
         LogUtils.d("to retry the request...");
-        Request newReq = null;
+        Request newReq;
         try {
             newReq = request.cloneRequest();
             newReq.retry();
@@ -290,7 +287,7 @@ public class Request implements Cloneable {
         app.enqueueRequest(this);
     }
 
-    public static Request createRequest(SyncApplication app, RequestEntity requestEntity) {
+    public static Request createRequest(PushApplication app, RequestEntity requestEntity) {
         return new Request(app, requestEntity);
     }
 

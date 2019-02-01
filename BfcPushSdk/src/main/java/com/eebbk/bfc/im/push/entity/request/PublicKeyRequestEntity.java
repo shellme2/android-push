@@ -4,7 +4,7 @@ import com.eebbk.bfc.im.push.anotation.CommandValue;
 import com.eebbk.bfc.im.push.anotation.TagValue;
 import com.eebbk.bfc.im.push.entity.Command;
 
-@CommandValue(Command.PUBLICKEY_REQUEST)
+@CommandValue(Command.PUBLIC_KEY_REQUEST)
 public class PublicKeyRequestEntity extends RequestEntity {
 
     @TagValue(1)

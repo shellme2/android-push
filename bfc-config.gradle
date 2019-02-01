@@ -1,0 +1,126 @@
+ext.bfcBuildConfig = [
+        // Demo以及SDK的compileSdkVersion
+        compileSdkVersion          : 23,
+        // Demo以及SDK的buildToolsVersion
+        buildToolsVersion          : "24.0.0",
+        // Demo以及SDK的minSdkVersion
+        minSdkVersion              : 15,
+        // Demo以及SDK的targetSdkVersion
+        targetSdkVersion           : 23,
+
+        // bfc库可引用的第三方library或者其他bfc库清单
+        deps                       : [
+                // -------------------  新版bfc -------------------
+                // 1级库
+                "bfc-log"               : 'com.eebbk.bfc:bfc-log:3.0.0',
+                "bfc-log-aop"           : 'com.eebbk.bfc:bfc-log-aop:3.0.0',
+                "bfc-log-plugin"        : 'com.eebbk.bfc:bfc-log-plugin:3.0.0',
+                "bfc-common"            : 'com.eebbk.bfc:bfc-common:3.0.0',
+                "bfc-sequencetools-json": 'com.eebbk.bfc:bfc-sequencetools-json:3.0.0',
+                "bfc-crypto"            : 'com.eebbk.bfc:bfc-crypto:3.0.0',
+                "bfc-common-res"        : 'com.eebbk.bfc:bfc-common-res:3.0.0',
+                "bfc-leakcanary"        : 'com.eebbk.bfc:bfc-leakcanary:3.0.0',
+                "bfc-leakcanary-no-op"  : 'com.eebbk.bfc:bfc-leakcanary-no-op:3.0.0',
+                "bfc-blockcanary"       : 'com.eebbk.bfc:bfc-blockcanary:3.0.0',
+                "bfc-blockcanary-no-op" : 'com.eebbk.bfc:bfc-blockcanary-no-op:3.0.0',
+
+                // 2级库
+                "bfc-download"          : 'com.eebbk.bfc:bfc-download:3.0.0',
+                "bfc-db"                : 'com.eebbk.bfc:bfc-db:3.0.0',
+                "bfc-db-generator"      : 'com.eebbk.bfc:bfc-db-generator:3.0.0',
+                "bfc-http"              : 'com.eebbk.bfc:bfc-http:3.0.0',
+                "bfc-imageloader"       : 'com.eebbk.bfc:bfc-imageloader:3.0.0',
+                "bfc-push"              : 'com.eebbk.bfc:bfc-push:3.0.0',
+                "bfc-push-common"       : 'com.eebbk.bfc:bfc-push-common:3.0.0',
+                "bfc-upload"            : 'com.eebbk.bfc:bfc-uploadsdk:3.0.0',
+                // 3级库
+                "bfc-behavior"          : 'com.eebbk.bfc:bfc-behavior:3.0.0',
+                "bfc-feedback"          : 'com.eebbk.bfc:bfc-feedback:3.0.0',
+                "bfc-accountsdk"        : 'com.eebbk.bfc:bfc-accountsdk:3.0.0',
+                "bfc-version-core"      : 'com.eebbk.bfc:bfc-version-core:3.0.0',
+                // 4级库
+                "bfc-version"           : 'com.eebbk.bfc:bfc-version:3.0.0',
+                "bfc-feedback-pad-ui"   : 'com.eebbk.bfc:bfc-feedback-pad-ui:3.0.0',
+                "bfc-feedback-phone-ui" : 'com.eebbk.bfc:bfc-feedback-phone-ui:3.0.0',
+                // 5级库
+                "bfc-version-ui"        : 'com.eebbk.bfc:bfc-version-update-ui:3.0.0',
+
+                // -------------------  新版bfc第三方依赖 -------------------
+                "support-annotations"   : 'com.android.support:support-annotations:23.4.0',
+                "okhttp"                : 'com.squareup.okhttp:okhttp:2.4.0',
+                "zip4j"                 : 'net.lingala.zip4j:zip4j:1.3.2',
+                //云巴 ormlite帐号库使用
+                "yunba"                 : 'io.yunba.android:yunba-sdk-release:1.8.5',
+                "ormlite"               : 'com.j256.ormlite:ormlite-android:5.0',
+                // commons-net和httpmine上载库使用
+                "commons-net"           : 'org.apache.http:commons-net:3.3.0',
+                "httpmime"              : 'org.apache.httpcomponents:httpmime:4.1.3',
+
+                // 数据库使用
+                "greendao"              : 'org.greenrobot:greendao:2.2.1',
+                "greendao-generator"    : 'org.greenrobot:greendao-generator:2.2.0',
+                // test
+                "junit"                 : 'junit:junit:4.12',
+
+                // -------------------  旧版bfc -------------------
+                "old-bfc-upload"        : 'com.eebbk.oldbfc:bfc-upload:2.4.4',
+                "old-bfc-utils"         : 'com.eebbk.oldbfc:bfc-utils:1.0.0',
+                "old-bfc-encrypt"       : 'com.eebbk.oldbfc:encrypt:2.0.0',
+                "old-bfc-desencrypt"    : 'com.eebbk.oldbfc:desencrypt:1.0.0',
+        ],
+
+        // demo用小天才签名配置
+        signing                    : [
+                "keyAlias"     : 'eebbkopen',
+                "keyPassword"  : 'eebbkopen',
+                "storePassword": 'eebbkopen',
+        ],
+
+        // demo用imoo签名配置
+        signingImoo                : [
+                "keyAlias"     : 'imoo',
+                "keyPassword"  : 'bbkeebbklinux123',
+                "storePassword": 'bbkeebbk',
+        ],
+
+        //本地库URL
+        MAVEN_URL                  : 'http://172.28.1.147:8081/nexus/content/repositories/thirdparty/',
+        //灰度仓库URL
+        MAVEN_RC_URL               : 'http://172.28.1.147:8081/nexus/content/repositories/thirdparty-rc/',
+        //测试仓库URL
+        MAVEN_SNAPSHOT_URL         : 'http://172.28.1.147:8081/nexus/content/repositories/thirdparty-snapshot/',
+
+        //登录nexus oss的用户名
+        NEXUS_USERNAME             : 'admin',
+        //登录nexus oss的密码
+        NEXUS_PASSWORD             : 'admin123',
+
+        // uploadArchives 上传bfc库配置
+        // base
+        POM_GROUP_ID               : 'com.eebbk.bfc',
+        POM_DESCRIPTION            : 'Bfc Lib For Android',
+        POM_URL                    : 'http://172.28.2.93/groups/bfc',
+        POM_INCEPTION_YEAR         : '2016',
+
+        // scm
+        POM_SCM_URL                : 'http://172.28.2.93/groups/bfc',
+        POM_SCM_CONNECTION         : 'scm:git@kf2GitHUB:bfc/Bfc.git',
+        POM_SCM_DEV_CONNECTION     : 'scm:git@kf2GitHUB:bfc/Bfc.git',
+
+        //licenses
+        POM_LICENCE_COMMENTS       : 'A business-friendly OSS license',
+        POM_LICENCE_NAME           : 'The Apache Software License, Version 2.0',
+        POM_LICENCE_URL            : 'http://www.apache.org/licenses/LICENSE-2.0.txt',
+        POM_LICENCE_DIST           : 'repo',
+
+        //developers
+        POM_DEVELOPER_ID           : 'bfc',
+        POM_DEVELOPER_NAME         : 'bfc',
+        POM_DEVELOPER_EMAIL        : '',
+        POM_DEVELOPER_URL          : 'http://172.28.2.93/groups/bfc',
+
+        //issueManagement
+        POM_ISSUE_MANAGEMENT_SYSTEM: 'GitLab',
+        POM_ISSUE_MANAGEMENT_URL   : 'http://172.28.2.93/groups/bfc/issues',
+
+]

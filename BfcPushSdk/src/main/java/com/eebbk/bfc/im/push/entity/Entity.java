@@ -3,7 +3,7 @@ package com.eebbk.bfc.im.push.entity;
 import com.eebbk.bfc.im.push.anotation.CommandValue;
 import com.eebbk.bfc.im.push.anotation.TagValue;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.util.GsonUtil;
+import com.eebbk.bfc.im.push.util.JsonUtil;
 import com.eebbk.bfc.im.push.util.TLVObjectUtil;
 
 import java.lang.reflect.Field;
@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
  * 请求实体和响应实体的基类
  */
 @CommandValue(0)
-public abstract class Entity {
+public abstract class Entity  {
 
     public int getCommand() {
         CommandValue commandValue = this.getClass().getAnnotation(CommandValue.class);
@@ -20,7 +20,7 @@ public abstract class Entity {
     }
 
     public int getTagValue(String fieldName) {
-        Field f = null;
+        Field f ;
         try {
             f = this.getClass().getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
@@ -45,6 +45,6 @@ public abstract class Entity {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + ":" + GsonUtil.toJSON(this);
+        return "{\""+this.getClass().getSimpleName() + "\":" + JsonUtil.toJson(this)+"}";
     }
 }

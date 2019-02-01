@@ -36,10 +36,10 @@ public class HostInfoManager {
             return false;
         }
         if (hostInfoList.contains(hostInfo)) {
-            LogUtils.w("There is a hostinfo ("+ hostInfo +") with the same hostname and port in the hostinfo list.");
+            LogUtils.w("There is a host info ("+ hostInfo +") with the same hostname and port in the host info list.");
             return false;
         }
-        LogUtils.i("add hostinfo success:" + hostInfo);
+        LogUtils.i("add host info success:" + hostInfo);
         return hostInfoList.add(hostInfo);
     }
 
@@ -114,7 +114,7 @@ public class HostInfoManager {
         List<HostInfo> list = sortByFailCountExcept(hostInfo);
         int size = list.size();
         if (size <= 0) {
-            LogUtils.i("default hostinfo:" + hi);
+            LogUtils.i("default host info:" + hi);
         } else {
             hi = list.get(0);
         }
@@ -122,7 +122,7 @@ public class HostInfoManager {
         if (hi == null) {
             hi = hostInfo;
         }
-        LogUtils.i("switch hostinfo:" + hi);
+        LogUtils.i("switch host info:" + hi);
         return hi;
     }
 

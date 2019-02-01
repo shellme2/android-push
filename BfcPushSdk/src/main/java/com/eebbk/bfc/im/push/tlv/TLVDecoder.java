@@ -1,12 +1,17 @@
 package com.eebbk.bfc.im.push.tlv;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * TLV解码实现
+ * <p/>
+ * Created by lhd on 2015/09/26.
  */
 public class TLVDecoder {
+
+    private static boolean printLog = false;
 
     /**
      * 解析TLV字节数组
@@ -14,25 +19,24 @@ public class TLVDecoder {
      * @param tlvBytes
      * @return
      */
-    public static TLVDecodeResult decode(byte[] tlvBytes) throws Exception {
-        List<TLVDecodeResult> list = new ArrayList<>();
+    public static TLVDecodeResult decode(byte[] tlvBytes) throws Throwable {
         TLVDecodeResult result = null;
         try {
-            result = decodeImpl(tlvBytes, list);
-        } catch (Exception e) {
-            throw e;
+            result = decodeImpl(tlvBytes);
+        } catch (Throwable throwable) {
+            throw throwable;
         }
         return result;
     }
 
     /**
-     * 递归逐个解析TLV
+     * fix a bug of ArrayIndexOutOfBoundsException when decoding tlv bytes
      *
      * @param tlvBytes
-     * @param list
      * @return
+     * @throws Throwable
      */
-    private static TLVDecodeResult decodeImpl(byte[] tlvBytes, List<TLVDecodeResult> list) {
+    private static TLVDecodeResult decodeImpl(byte[] tlvBytes) throws IOException {
         if (tlvBytes == null || tlvBytes.length == 0) {
             return null;
         }
@@ -41,25 +45,85 @@ public class TLVDecoder {
         byte[] tagBytes = new byte[tagBytesSize];
         System.arraycopy(tlvBytes, 0, tagBytes, 0, tagBytesSize);
 
-        // System.out.println("info:"+tlvBytes.length+" "+tagBytesSize);
+        // 截取Length
+        int lengthBytesSize = getLengthBytesSize(tlvBytes, tagBytesSize);
+        byte[] lengthBytes = new byte[lengthBytesSize];
+        System.arraycopy(tlvBytes, tagBytesSize, lengthBytes, 0, lengthBytesSize);
+
+        int valueBytesSize = 0;
+        byte[] valueBytes = null;
+
+        int dataType = decodeDataType(tagBytes);
+        Object value = null;
+        if (dataType == TLVEncoder.ConstructedData) {
+            valueBytesSize = decodeLength(lengthBytes);
+            valueBytes = new byte[valueBytesSize];
+            System.arraycopy(tlvBytes, tagBytesSize + lengthBytesSize, valueBytes, 0, valueBytesSize);
+            value = decodeMulti(valueBytes);
+        } else {
+            valueBytesSize = decodeLength(lengthBytes);
+            valueBytes = new byte[valueBytesSize];
+            System.arraycopy(tlvBytes, tagBytesSize + lengthBytesSize, valueBytes, 0, valueBytesSize);
+            value = valueBytes;
+        }
+        TLVDecodeResult result = new TLVDecodeResult();
+        result.setFrameType(decodeFrameType(tagBytes));
+        result.setDataType(decodeDataType(tagBytes));
+        result.setTagValue(decodeTagValue(tagBytes));
+        result.setLength(decodeLength(lengthBytes));
+        result.setValue(value);
+        return result;
+    }
+
+    private static List<TLVDecodeResult> decodeMulti(byte[] multiTlvBytes) throws IOException {
+        if (multiTlvBytes == null || multiTlvBytes.length == 0) {
+            return null;
+        }
+        TLVByteBuffer tlvByteBuffer = new TLVByteBuffer();
+        tlvByteBuffer.write(multiTlvBytes);
+        List<TLVDecodeResult> list = new ArrayList<>();
+        while (tlvByteBuffer.hasNextTLVData()) {
+            list.add(decodeImpl(tlvByteBuffer.cutNextTLVData()));
+        }
+        return list;
+    }
+
+    /**
+     * 递归逐个解析TLV，此方法有一个bug，会导致tlv数据解析的数组下标越界，因此遗弃
+     *
+     * @param tlvBytes
+     * @param list
+     * @return
+     */
+    @Deprecated
+    private static TLVDecodeResult decodeImpl(byte[] tlvBytes, List<TLVDecodeResult> list) throws Throwable {
+        if (tlvBytes == null || tlvBytes.length == 0) {
+            return null;
+        }
+        printLog("tlvBytes length:" + tlvBytes.length);
+        // 截取Tag
+        int tagBytesSize = getTagBytesSize(tlvBytes);
+        byte[] tagBytes = new byte[tagBytesSize];
+        printLog("tagBytesSize:" + tagBytesSize);
+        System.arraycopy(tlvBytes, 0, tagBytes, 0, tagBytesSize);
 
         // 截取Length
         int lengthBytesSize = getLengthBytesSize(tlvBytes, tagBytesSize);
         byte[] lengthBytes = new byte[lengthBytesSize];
-        System.arraycopy(tlvBytes, tagBytesSize, lengthBytes, 0,
-                lengthBytesSize);
+        printLog("lengthBytesSize:" + lengthBytesSize);
+        System.arraycopy(tlvBytes, tagBytesSize, lengthBytes, 0, lengthBytesSize);
 
         // 截取Value
         int valueBytesSize = decodeLength(lengthBytes);
         byte[] valueBytes = new byte[valueBytesSize];
-        System.arraycopy(tlvBytes, tagBytesSize + lengthBytesSize, valueBytes,
-                0, valueBytesSize);
+        printLog("valueBytesSize:" + valueBytesSize);
+        System.arraycopy(tlvBytes, tagBytesSize + lengthBytesSize, valueBytes, 0, valueBytesSize);
 
         // 解析数据
-        TLVDecodeResult result = decodeFirstTLV(tagBytes, lengthBytes,
-                valueBytes);
-        if (result != null)
+        TLVDecodeResult result = decodeFirstTLV(tagBytes, lengthBytes, valueBytes);
+        if (result != null) {
             list.add(result);
+        }
 
         int totalSize = tlvBytes.length;
         int firstTLVSize = tagBytesSize + lengthBytesSize + valueBytesSize;
@@ -67,6 +131,12 @@ public class TLVDecoder {
             decodeSecondTLV(tlvBytes, firstTLVSize, list);
         }
         return result;
+    }
+
+    private static void printLog(String text) {
+        if (printLog) {
+            System.out.print(text);
+        }
     }
 
     /**
@@ -77,7 +147,8 @@ public class TLVDecoder {
      * @param valueBytes
      * @return
      */
-    private static TLVDecodeResult decodeFirstTLV(byte[] tagBytes, byte[] lengthBytes, byte[] valueBytes) {
+    @Deprecated
+    private static TLVDecodeResult decodeFirstTLV(byte[] tagBytes, byte[] lengthBytes, byte[] valueBytes) throws Throwable {
         int dataType = decodeDataType(tagBytes);
         TLVDecodeResult result = new TLVDecodeResult();
         result.setFrameType(decodeFrameType(tagBytes));
@@ -85,7 +156,8 @@ public class TLVDecoder {
         result.setTagValue(decodeTagValue(tagBytes));
         result.setLength(decodeLength(lengthBytes));
         if (dataType == TLVEncoder.ConstructedData) {
-            List<TLVDecodeResult> childList = new ArrayList<TLVDecodeResult>();
+            printLog("TLVDecodeResult dataType:" + dataType);
+            List<TLVDecodeResult> childList = new ArrayList<>();
             decodeImpl(valueBytes, childList);
             result.setValue(childList);
         } else {
@@ -107,7 +179,8 @@ public class TLVDecoder {
      * @param firstTLVSize
      * @param list
      */
-    private static TLVDecodeResult decodeSecondTLV(byte[] tlvBytes, int firstTLVSize, List<TLVDecodeResult> list) {
+    @Deprecated
+    private static TLVDecodeResult decodeSecondTLV(byte[] tlvBytes, int firstTLVSize, List<TLVDecodeResult> list) throws Throwable {
         int totalSize = tlvBytes.length;
         byte[] nextBytes = new byte[totalSize - firstTLVSize];
         System.arraycopy(tlvBytes, firstTLVSize, nextBytes, 0, totalSize - firstTLVSize);
@@ -172,7 +245,7 @@ public class TLVDecoder {
         for (byte b : tlvBytes) {
             length++;
             int test = b & 0x80;
-            if (test == 0) {
+            if (test == 0x00) {
                 return length;
             }
         }
@@ -234,7 +307,6 @@ public class TLVDecoder {
             //低位到高位解析
             result = decodeValueFromLowToHighBit(tagBytes);
         }
-        // System.out.println(result);
         return result;
     }
 
@@ -280,7 +352,8 @@ public class TLVDecoder {
         } else {
             result |= 0x7f & lengthBytes[0];
             for (int i = 1; i < lengthBytes.length; i++) {
-                result |= (0x7f & lengthBytes[i]) << 7 * (lengthBytes.length - i);
+//                result |= (0x7f & lengthBytes[i]) << 7 * (lengthBytes.length - i);
+                result |= (0x7f & lengthBytes[i]) << 7 * i;
             }
         }
         return result;

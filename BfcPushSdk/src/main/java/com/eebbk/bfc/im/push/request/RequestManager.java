@@ -1,7 +1,7 @@
 package com.eebbk.bfc.im.push.request;
 
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
 import com.eebbk.bfc.im.push.response.Response;
 import com.eebbk.bfc.im.push.response.ResponseCreator;
 
@@ -14,14 +14,16 @@ import java.util.List;
  */
 public class RequestManager {
 
+    private static final String TAG = "RequestManager";
+
     /**
      * 请求队列
      */
     private List<Request> requests = new ArrayList<>();
 
-    private SyncApplication app;
+    private PushApplication app;
 
-    public RequestManager(SyncApplication app) {
+    public RequestManager(PushApplication app) {
         this.app = app;
     }
 
@@ -31,7 +33,7 @@ public class RequestManager {
 
     public synchronized void add(Request request) {
         if (requests.add(request)) {
-            LogUtils.d("add a request,RID::command==" + request.getRID()+"::"+request.getCommand());
+            LogUtils.d(TAG,"add a request,RID::command==" + request.getRID()+"::"+request.getCommand());
         }
         app.getRequestSweeper().start();
     }
@@ -42,11 +44,11 @@ public class RequestManager {
      */
     public synchronized void removeOnceResponse(Request request) {
         if (request.isMutiResponse()) {
-            LogUtils.d("remove fail a request,RID::command==" + request.getRID()+"::"+request.getCommand());
+            LogUtils.d(TAG,"remove fail a request,RID::command==" + request.getRID()+"::"+request.getCommand());
             return;
         }
         if (requests.remove(request)) {
-            LogUtils.d("remove a request,RID::command==" + request.getRID()+"::"+request.getCommand());
+            LogUtils.d(TAG,"remove a request,RID::command==" + request.getRID()+"::"+request.getCommand());
             // 这里调用的时候，request有可能已经在定时器中被移除，因此要判断
             if (request != null) {
                 request.getOnReceiveFinishListener().onFinish(); // 请求已移除，标记完成
@@ -59,7 +61,7 @@ public class RequestManager {
      */
     public synchronized void remove(Request request) {
         if (requests.remove(request)) {
-            LogUtils.d("remove a request,RID::command==" + request.getRID()+"::"+request.getCommand());
+            LogUtils.d(TAG,"remove a request,RID::command==" + request.getRID()+"::"+request.getCommand());
             // 这里调用的时候，request有可能已经在定时器中被移除，因此要判断
             if (request != null) {
                 request.getOnReceiveFinishListener().onFinish(); // 请求已移除，标记完成
@@ -101,8 +103,8 @@ public class RequestManager {
         if (requests.isEmpty()) {
             return 0;
         }
-        int dispatchCount = 0;
-        int clearCount = 0;
+        int dispatchCount ;
+        int clearCount ;
         List<Request> timeoutRequests = new ArrayList<>();
         for (Iterator<Request> it = requests.iterator(); it.hasNext();) {
             Request r = it.next();
@@ -115,13 +117,13 @@ public class RequestManager {
             r.getOnReceiveFinishListener().onFinish(); // 请求已移除，标记完成
             Response response = ResponseCreator.createTimeoutResponse(app, r);
             app.getDispatcher().dispatch(response);
-            LogUtils.d("dispatch a timeout request,RID:" + r.getRID());
+            LogUtils.d(TAG,"dispatch a timeout request,RID:" + r.getRID());
         }
         clearCount = timeoutRequests.size();
         if (clearCount > 0) {
             requests.removeAll(timeoutRequests);
             timeoutRequests.clear();
-            LogUtils.d("clear [" + clearCount + "] requests.");
+            LogUtils.d(TAG,"clear [" + clearCount + "] requests.");
         }
         return dispatchCount;
     }

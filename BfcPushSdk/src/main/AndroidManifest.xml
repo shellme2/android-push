@@ -1,146 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.eebbk.bfc.im">
+<manifest package="com.eebbk.bfc.im"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Required  一些系统要求的权限，如访问网络等 -->
-    <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
+    <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT"/>
 
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.GET_TASKS"/>
 
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-
-    <permission android:name="com.xtc.watch.permission.MIPUSH_RECEIVE"
-        android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 
     <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="com.xtc.watch.permission.MIPUSH_RECEIVE" />
 
-    <uses-permission android:name="android.permission.READ_SECURE_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <!-- 5.1之后系统需要添加此权限才能获取后台运行的进程信息，我们自己的系统对eebbk的包名开放 -->
+    <uses-permission android:name="android.permission.REAL_GET_TASKS"/>
 
-    <application
-        android:allowBackup="false"
-        android:hardwareAccelerated="false">
+
+    <!--android:allowBackup="false"-->
+    <!--android:hardwareAccelerated="false"-->
+    <application>
+
+        <!-- <service android:name=".push.service.heartbeat.KeepLiveService"
+             android:permission="android.permission.BIND_JOB_SERVICE" />-->
+
+        <!--android:label="SyncPushService"-->
+        <!--android:persistent="true"-->
         <service
             android:name="com.eebbk.bfc.im.push.service.ConnectionService"
-            android:process="sync.push"
             android:enabled="true"
             android:exported="true"
-            android:label="SyncPushService"
-            android:persistent="true">
+            android:process="eebbk.push">
             <intent-filter android:priority="0x7fffffff">
-                <action android:name="com.eebbk.bfc.im.connection_service" />
+                <action android:name="com.eebbk.bfc.im.connection_service"/>
             </intent-filter>
         </service>
 
-        <service android:name="com.eebbk.bfc.im.push.service.ConnectionService$InnerService"
-            android:process="sync.push"
+        <service
+            android:name="com.eebbk.bfc.im.push.service.ConnectionService$InnerService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="true"
+            android:process="eebbk.push"/>
 
         <!-- 处理推送状态切换，网络切换 -->
-        <service android:name="com.eebbk.bfc.im.push.service.heartbeat.SyncHandleService"
+        <service
+            android:name="com.eebbk.bfc.im.push.service.heartbeat.SyncHandleService"
             android:exported="true">
-            <intent-filter>
-                <action android:name="com.eebbk.bfc.im.push.set" />
-                <action android:name="com.eebbk.bfc.im.network.connected" />
-                <category android:name="com.eebbk.bfc.im" />
+            <intent-filter android:priority = "1000">
+                <action android:name="com.eebbk.bfc.im.push.set"/>
+                <action android:name="com.eebbk.bfc.im.network.connected"/>
+
+                <category android:name="com.eebbk.bfc.im"/>
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="com.eebbk.bfc.im.push.service.heartbeat.ConnectSwitchService"
+            android:exported="true">
+            <intent-filter android:priority = "1000">
+                <action android:name="com.eebbk.bfc.im.connect_switch_service"/>
+                <category android:name="com.eebbk.bfc.im"/>
             </intent-filter>
         </service>
 
         <!-- 处理选举宿主service -->
-        <service android:name="com.eebbk.bfc.im.push.service.host.HostElectionHandleService"
+        <service
+            android:name="com.eebbk.bfc.im.push.service.host.HostElectionHandleService"
             android:exported="true">
-            <intent-filter>
-                <action android:name="com.eebbk.bfc.im.push.host_service.check" />
-                <action android:name="com.eebbk.bfc.im.stop_conn_service" />
-                <category android:name="com.eebbk.bfc.im" />
+            <intent-filter android:priority = "1000">
+                <action android:name="com.eebbk.bfc.im.push.host_service.check"/>
+                <action android:name="com.eebbk.bfc.im.stop_conn_service"/>
+
+                <category android:name="com.eebbk.bfc.im"/>
             </intent-filter>
         </service>
 
         <!-- 处理推送消息 -->
-        <service android:name="com.eebbk.bfc.im.push.communication.MessageHandleService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.eebbk.bfc.im.read_data" />
-                <category android:name="com.eebbk.bfc.im" />
+        <service
+            android:name="com.eebbk.bfc.im.push.communication.MessageHandleService"
+            android:exported="true" >
+            <intent-filter android:priority = "1000">
+                <action android:name="com.eebbk.bfc.im.read_data"/>
+                <category android:name="com.eebbk.bfc.im"/>
             </intent-filter>
         </service>
 
         <!-- 处理推送连接成功 -->
-        <service android:name="com.eebbk.bfc.im.push.service.heartbeat.PushConnStatusChangedHandleService"
+        <service
+            android:name="com.eebbk.bfc.im.push.communication.PushConnStatusChangedHandleService"
+            android:enabled="true"
             android:exported="true">
-            <intent-filter>
-                <action android:name="com.eebbk.bfc.im.connected" />
-                <action android:name="com.eebbk.bfc.im.disconnected" />
-                <category android:name="com.eebbk.bfc.im" />
+            <intent-filter android:priority = "1000">
+                <action android:name="com.eebbk.bfc.im.connected"/>
+                <action android:name="com.eebbk.bfc.im.disconnected"/>
+
+                <category android:name="com.eebbk.bfc.im"/>
             </intent-filter>
         </service>
 
+        <!-- <receiver
+              android:name="com.eebbk.bfc.im.push.communication.SyncDataReceiver"
+              android:enabled="true"
+              android:exported="true" >
+              <intent-filter>
+                  <action android:name="com.eebbk.bfc.im.read_data" />
+                  <action android:name="com.eebbk.bfc.im.connected" />
+                  <action android:name="com.eebbk.bfc.im.disconnected" />
+                  <category android:name="com.eebbk.bfc.im" />
+              </intent-filter>
+          </receiver>-->
 
-        <receiver
-            android:name="com.eebbk.bfc.im.push.communication.SyncDataReceiver"
-            android:enabled="true"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="com.eebbk.bfc.im.read_data" />
-                <action android:name="com.eebbk.bfc.im.connected" />
-                <action android:name="com.eebbk.bfc.im.disconnected" />
-                <category android:name="com.eebbk.bfc.im" />
-            </intent-filter>
-        </receiver>
-
-        <!--android:process="sync.push"-->
-        <receiver
-            android:name="com.eebbk.bfc.im.push.service.heartbeat.SyncPushSystemReceiver"
-            android:enabled="true"
-            android:process="sync.push"
+        <service
+            android:name="com.eebbk.bfc.im.push.debug.da.DaService"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.eebbk.bfc.im.wake_action" />
+                <action android:name="com.eebbk.bfc.im.da_service"/>
+                <category android:name="com.eebbk.bfc.im"/>
             </intent-filter>
+        </service>
 
+        <service
+            android:name="com.eebbk.bfc.im.push.debug.da.LogService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.eebbk.bfc.im.log_service"/>
+                <category android:name="com.eebbk.bfc.im"/>
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="com.eebbk.bfc.im.push.service.heartbeat.SyncPushSystemReceiver"
+            android:exported="true"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:process="eebbk.push">
             <intent-filter>
                 <!-- 一个已存在的应用程序包已经从设备上移除，包括包名（卸载监听所在的app，则无法接收到） -->
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-                <data android:scheme="package" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED"/>
+                <data android:scheme="package"/>
             </intent-filter>
 
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" /> <!-- 系统自启广播 -->
-                <action android:name="android.intent.action.ACTION_SHUTDOWN" /> <!-- 关机广播 -->
-                <action android:name="android.intent.action.USER_PRESENT" /> <!-- 手机开屏广播 -->
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" /> <!-- 网络切换广播 -->
+                <action android:name="android.intent.action.ACTION_SHUTDOWN"/> <!-- 关机广播 -->
+                <action android:name="android.intent.action.USER_PRESENT"/> <!-- 手机开屏广播 -->
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/> <!-- 网络切换广播 -->
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.eebbk.bfc.im.push.service.heartbeat.HeartBeatReceiver"
-            android:process="sync.push"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.eebbk.bfc.im.heartbeat" />
+        <receiver
+            android:name="com.eebbk.bfc.im.push.service.heartbeat.HeartBeatReceiver"
+            android:exported="false"
+            android:process="eebbk.push">
+            <intent-filter >
+                <action android:name="com.eebbk.bfc.im.heartbeat"/>
             </intent-filter>
         </receiver>
-
-        <!--<meta-data
-            android:name="SYNC_APPKEY"
-            android:value="7be64b5953d6417490f9609154cc22fd" />
-        <meta-data
-            android:name="SYNC_RID_TAG"
-            android:value="1"/>-->
-
 
     </application>
 

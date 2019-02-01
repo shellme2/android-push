@@ -30,15 +30,19 @@ public class SyncNotificationManager {
         onHandleNotificationMap = new HashMap<>();
     }
 
-    private synchronized static void release() {
+    private void release() {
         if (syncNotificationManager != null) {
             syncNotificationManager = null;
         }
     }
 
-    public synchronized void clear() {
-        onHandleNotificationMap.clear();
-        release();
+    public void clear() {
+        synchronized (SyncNotificationManager.class) {
+            if (onHandleNotificationMap != null) {
+                onHandleNotificationMap.clear();
+            }
+            release();
+        }
     }
 
     public void onShowNotification(long dialogId, long syncKey) {

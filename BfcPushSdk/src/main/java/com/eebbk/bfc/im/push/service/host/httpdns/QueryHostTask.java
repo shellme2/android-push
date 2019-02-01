@@ -41,19 +41,19 @@ public class QueryHostTask implements Callable<String> {
         this.accountId = accountId;
         this.hostCache = hostCache;
         this.encryptHostName = DesEncryptUtil.encrypt(hostName);
-        LogUtils.i("httpdns 加密后结果:" + encryptHostName);
+        LogUtils.i("http dns 加密后结果:" + encryptHostName);
     }
 
     private HttpDNSResult convert(String decryptStr) {
-        LogUtils.i("httpdns 解密结果:" + decryptStr);
+        LogUtils.i("http dns 解密结果:" + decryptStr);
         if (TextUtils.isEmpty(decryptStr)) {
             return null;
         }
         int lastCommaIndex = decryptStr.lastIndexOf(",");
         String ttlStr = decryptStr.substring(lastCommaIndex + 1, decryptStr.length());
-        LogUtils.i("httpdns ttl:" + ttlStr);
+        LogUtils.i("http dns ttl:" + ttlStr);
         String[] ipArray = decryptStr.substring(0, lastCommaIndex).split(";");
-        LogUtils.i("httpdns ips:" + Arrays.toString(ipArray));
+        LogUtils.i("http dns ips:" + Arrays.toString(ipArray));
         HttpDNSResult httpDNSResult = new HttpDNSResult();
         httpDNSResult.setHost(hostName);
         httpDNSResult.setIps(Arrays.asList(ipArray));
@@ -80,7 +80,7 @@ public class QueryHostTask implements Callable<String> {
                 while ((line = streamReader.readLine()) != null) {
                     sb.append(line);
                 }
-                LogUtils.i("httpdns 解析结果:" + sb.toString());
+                LogUtils.i("http dns 解析结果:" + sb.toString());
                 String decryptStr = new String(DesEncryptUtil.decrypt(sb.toString()));
                 HttpDNSResult httpDNSResult = convert(decryptStr);
                 if (httpDNSResult != null) {
@@ -105,7 +105,7 @@ public class QueryHostTask implements Callable<String> {
                         synchronized (hostCache) {
                             hostCache.put(host, hostObject);
                         }
-                        LogUtils.i("httpdns ips:" + hostCache);
+                        LogUtils.i("http dns ips:" + hostCache);
                         return ip;
                     } else {
                         return null;

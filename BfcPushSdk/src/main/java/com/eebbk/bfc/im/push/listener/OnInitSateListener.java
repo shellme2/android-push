@@ -5,5 +5,5 @@ package com.eebbk.bfc.im.push.listener;
  */
 public interface OnInitSateListener {
     void onSuccess();
-    void onFail(String errorMsg);
+    void onFail(String errorMsg, String errorCode);
 }

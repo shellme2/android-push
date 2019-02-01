@@ -2,6 +2,8 @@ package com.eebbk.bfc.im.push.tlv;
 
 /**
  * TLV编码实现
+ * <p/>
+ * Created by lhd on 2015/09/26.
  */
 public class TLVEncoder {
 
@@ -36,6 +38,11 @@ public class TLVEncoder {
      */
     public static TLVEncodeResult encode(int frameType, int dataType,
                                          int tagValue, byte[] value) {
+        /*TLVEncodeResult tlvEncodeResult = TLVCache.getTLVEncodeResult(frameType, dataType, tagValue, value);
+        if (tlvEncodeResult != null) {
+            return tlvEncodeResult;
+        }*/
+
         byte[] tagBytes = encodeTag(frameType, dataType, tagValue);
         // System.out.println("tag:"+new BigInteger(1, tagBytes).toString(2));
 
@@ -50,6 +57,7 @@ public class TLVEncoder {
         result.setLengthSize(lengthBytes.length);
         result.setValueBytes(value);
         result.setValueSize(value == null ? 0 : value.length);
+//        TLVCache.addTlvEncoderCache(frameType, dataType, tagValue, value, result);
         return result;
     }
 

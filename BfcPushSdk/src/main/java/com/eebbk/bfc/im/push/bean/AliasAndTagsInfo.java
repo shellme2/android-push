@@ -7,7 +7,7 @@ import java.util.List;
 
 public class AliasAndTagsInfo {
 
-    public static AliasAndTagsInfo EMPTY_ALIASANDTAGSINFO=new AliasAndTagsInfo();
+    public static AliasAndTagsInfo EMPTY_ALIAS_TAGS_INFO =new AliasAndTagsInfo();
 
     private String alias;
 
@@ -83,7 +83,7 @@ public class AliasAndTagsInfo {
 
     @Override
     public String toString() {
-        return "PushHandlerInfo{" +
+        return "AliasAndTagsInfo{" +
                 "alias='" + alias + '\'' +
                 ", tags='" + tags + '\'' +
                 ", isSet=" + isSet +

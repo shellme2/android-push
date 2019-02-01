@@ -1,0 +1,13 @@
+1、添加测试仓库
+
+allprojects {
+    repositories {
+        jcenter()
+        //测试版仓库地址
+        maven { url 'http://172.28.1.147:8081/nexus/content/repositories/thirdparty-snapshot/' }
+    }
+}
+
+2、集成依赖测试版本
+
+ compile "com.eebbk.bfc:bfc-push-common:4.0.0-beta"

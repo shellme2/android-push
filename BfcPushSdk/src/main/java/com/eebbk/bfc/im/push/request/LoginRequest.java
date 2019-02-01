@@ -1,17 +1,17 @@
 package com.eebbk.bfc.im.push.request;
 
-import com.eebbk.bfc.im.push.bean.SyncRegistInfo;
+import com.eebbk.bfc.im.push.bean.SyncRegisterInfo;
 import com.eebbk.bfc.im.push.entity.request.LoginRequestEntity;
 import com.eebbk.bfc.im.push.listener.OnGetCallBack;
 import com.eebbk.bfc.im.push.listener.OnReceiveListener;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.util.RandomUtil;
 import com.eebbk.bfc.im.push.util.TimeFormatUtil;
 
 public class LoginRequest extends Request {
 
-    public LoginRequest(SyncApplication app, LoginRequestEntity loginRequestEntity, OnReceiveListener onReceiveListener) {
+    public LoginRequest(PushApplication app, LoginRequestEntity loginRequestEntity, OnReceiveListener onReceiveListener) {
         super(app, loginRequestEntity);
         this.isNeedResponse = true;
         // 无限重试
@@ -22,10 +22,14 @@ public class LoginRequest extends Request {
 
     @Override
     public void retry() {
-        app.getSyncRegistInfoSafely(new OnGetCallBack<SyncRegistInfo>() {
+        app.getSyncRegisterInfoSafely(new OnGetCallBack<SyncRegisterInfo>() {
             @Override
-            public void onGet(SyncRegistInfo syncRegistInfo) {
-                LoginRequestEntity entity = app.getRequestEntityFactory().createLoginRequestEntity(syncRegistInfo.getRegistId(), syncRegistInfo.getRegistToken());
+            public void onGet(SyncRegisterInfo syncRegisterInfo) {
+                if(syncRegisterInfo == null){
+                    LogUtils.e("LoginRequest","syncRegisterInfo is null ,just stop login !!! ");
+                    return;
+                }
+                LoginRequestEntity entity = app.getRequestEntityFactory().createLoginRequestEntity(syncRegisterInfo.getRegisterId(), syncRegisterInfo.getRegisterToken());
                 requestEntity = entity;
                 LogUtils.d("to retry login,entity:" + requestEntity);
                 send();

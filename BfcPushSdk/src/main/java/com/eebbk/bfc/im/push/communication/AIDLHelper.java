@@ -2,10 +2,11 @@ package com.eebbk.bfc.im.push.communication;
 
 import android.os.DeadObjectException;
 import android.os.RemoteException;
+import android.text.TextUtils;
 
 import com.eebbk.bfc.im.push.IConnectionService;
-import com.eebbk.bfc.im.push.util.LogUtils;
 import com.eebbk.bfc.im.push.util.AsyncExecutorUtil;
+import com.eebbk.bfc.im.push.util.LogUtils;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -15,7 +16,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class AIDLHelper {
 
+    private static final String TAG = "AIDLHelper";
+
     private volatile IConnectionService iConnectionService;
+    private volatile String servicePackageName;
 
     private ConnectionServiceManager connectionServiceManager;
 
@@ -27,21 +31,34 @@ public class AIDLHelper {
         this.connectionServiceManager = connectionServiceManager;
     }
 
-    public synchronized void setIConnectionService(IConnectionService iConnectionService) {
+    public void setIConnectionService(IConnectionService iConnectionService, String servicePackageName) {
         this.iConnectionService = iConnectionService;
+        this.servicePackageName = servicePackageName;
         if (iConnectionService != null) {
             signalAll();
         }
     }
 
+    public IConnectionService getiConnectionService() {
+        return iConnectionService;
+    }
+
+    public boolean isCurrConnectionService(String packageName){
+        LogUtils.e(TAG, "packageName:" + packageName + ",servicePackageName:" + servicePackageName);
+        if(TextUtils.isEmpty(servicePackageName)){
+            return false;
+        }
+        return TextUtils.equals(packageName, servicePackageName);
+    }
+
     /**
      * 有返回值的aidl接口调用
-     *
-     * @param task
-     * @param <T>
-     * @return
      */
-    public synchronized <T> T call(AIDLTaskImpl<T> task) {
+    public  <T> T call(AIDLTaskImpl<T> task) {
+        if (connectionServiceManager == null) {
+            return null;
+        }
+
         if (connectionServiceManager.isShutdown()) {
             return null;
         }
@@ -51,11 +68,11 @@ public class AIDLHelper {
                 t = task.submit(iConnectionService);
             } else {
                 retryStart(false);
-                LogUtils.e("iConnectionService is null.");
+                LogUtils.e(TAG, "call back when init is failed iConnectionService is null.");
             }
         } catch (RemoteException e) {
             LogUtils.e(e);
-            dealDeadObjectExeception(e);
+            dealDeadObjectException(e);
         } catch (RuntimeException e) {
             LogUtils.e(e);
         }
@@ -63,11 +80,34 @@ public class AIDLHelper {
     }
 
     /**
-     * 没有返回值的aidl接口调用
-     *
-     * @param task
+     * 有返回值的aidl接口调用
      */
-    public synchronized void run(AIDLTaskImpl task) {
+    public  <T> T callOnInit(AIDLTaskImpl<T> task) {
+        if (connectionServiceManager == null) {
+            return null;
+        }
+
+        if (connectionServiceManager.isShutdown()) {
+            return null;
+        }
+        T t = null;
+        try {
+            //如果为null 也直接返回为null 就不进行重试连接处理
+            t = task.submit(iConnectionService);
+        } catch (RemoteException e) {
+            LogUtils.e(e);
+            dealDeadObjectException(e);
+        } catch (RuntimeException e) {
+            LogUtils.e(e);
+        }
+        return t;
+    }
+
+
+    /**
+     * 没有返回值的aidl接口调用
+     */
+    public  void run(AIDLTaskImpl task) {
         if (connectionServiceManager.isShutdown()) {
             return;
         }
@@ -76,11 +116,11 @@ public class AIDLHelper {
                 task.execute(iConnectionService);
             } else {
                 retryStart(false);
-                LogUtils.e("iConnectionService is null.");
+                LogUtils.e(TAG, "call back when init is failed ,iConnectionService is null.");
             }
         } catch (RemoteException e) {
             LogUtils.e(e);
-            dealDeadObjectExeception(e);
+            dealDeadObjectException(e);
         } catch (RuntimeException e) {
             LogUtils.e(e);
         }
@@ -88,10 +128,8 @@ public class AIDLHelper {
 
     /**
      * 异步执行aidl接口
-     *
-     * @param task
      */
-    public synchronized void waitForRun(final AIDLTaskImpl task) {
+    public  void waitForRun(final AIDLTaskImpl task) {
         if (connectionServiceManager.isShutdown()) {
             return;
         }
@@ -116,26 +154,26 @@ public class AIDLHelper {
         }
     }
 
-    private synchronized void toRun(AIDLTaskImpl task) {
+    private  void toRun(AIDLTaskImpl task) {
         try {
             if (iConnectionService != null) {
                 task.execute(iConnectionService);
             }
         } catch (RemoteException e) {
             LogUtils.e(e);
-            dealDeadObjectExeception(e);
+            dealDeadObjectException(e);
         } catch (RuntimeException e) {
             LogUtils.e(e);
         }
     }
 
     private void retryStart(boolean reconnect) {
-        if (!connectionServiceManager.isStarting() && !connectionServiceManager.isShutdown()) {
+        if (!connectionServiceManager.isStarting() && !connectionServiceManager.isShutdown()&&!connectionServiceManager.isBind()) {
             connectionServiceManager.startConnect(reconnect);
         }
     }
 
-    private void dealDeadObjectExeception(RemoteException e) {
+    private void dealDeadObjectException(RemoteException e) {
         if (e instanceof DeadObjectException) {
             if (iConnectionService == null) {
                 retryStart(false);
@@ -167,4 +205,5 @@ public class AIDLHelper {
             LogUtils.d("signal all iConnectionService init waiting...");
         }
     }
+
 }

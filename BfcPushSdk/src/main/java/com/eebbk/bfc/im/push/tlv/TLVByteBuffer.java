@@ -1,17 +1,21 @@
 package com.eebbk.bfc.im.push.tlv;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * TLV字节数据缓冲区
+ * Created by lhd on 2015/09/26.
  */
 public class TLVByteBuffer extends ByteArrayOutputStream {
 
-    private int firstTotalSize = 0;
+    private static boolean printLog = false;
 
-    private int firstTagSize = 0;
+    private volatile int firstTotalSize = 0;
 
-    private int firstLengthSize = 0;
+    private volatile int firstTagSize = 0;
+
+    private volatile int firstLengthSize = 0;
 
     /**
      * 检测是否已经有第一个完整的TLV字节数据
@@ -24,11 +28,7 @@ public class TLVByteBuffer extends ByteArrayOutputStream {
         }
 
         compute();
-        if (firstTotalSize > 0 && count > 0 && firstTotalSize <= count) {
-            return true;
-        } else {
-            return false;
-        }
+        return firstTotalSize > 0 && count > 0 && firstTotalSize <= count;
     }
 
     @Override
@@ -37,6 +37,16 @@ public class TLVByteBuffer extends ByteArrayOutputStream {
         firstTotalSize = 0;
         firstTagSize = 0;
         firstLengthSize = 0;
+    }
+
+    @Override
+    public synchronized void close() throws IOException {
+        super.close();
+    }
+
+    @Override
+    public synchronized void write(byte[] buffer, int offset, int len) {
+        super.write(buffer, offset, len);
     }
 
     /**
@@ -58,6 +68,8 @@ public class TLVByteBuffer extends ByteArrayOutputStream {
             reset();
             write(tmp, 0, tmp.length);
             data = tlvBytes;
+        } else {
+            System.err.println("firstTotalSize:" + firstTotalSize + ",count:" + count + ",firstTotalSize must smaller than count!");
         }
         return data;
     }
@@ -73,12 +85,14 @@ public class TLVByteBuffer extends ByteArrayOutputStream {
     private void computeTagSize() {
         if (firstTagSize == 0) {
             firstTagSize = TLVDecoder.getTagBytesSize(this.toByteArray());
+            print("firstTagSize:" + firstTagSize);
         }
     }
 
     private void computeLengthSize() {
         if (firstLengthSize == 0 && firstTagSize != 0) {
             firstLengthSize = TLVDecoder.getLengthBytesSize(this.toByteArray(), firstTagSize);
+            print("firstLengthSize:" + firstLengthSize);
         }
     }
 
@@ -89,6 +103,13 @@ public class TLVByteBuffer extends ByteArrayOutputStream {
                     firstLengthSize);
             int valueSize = TLVDecoder.decodeLength(lengthBytes);
             firstTotalSize = firstTagSize + firstLengthSize + valueSize;
+            print("firstTotalSize:" + firstTotalSize);
+        }
+    }
+
+    private void print(String log) {
+        if (printLog) {
+            System.out.print(log);
         }
     }
 }

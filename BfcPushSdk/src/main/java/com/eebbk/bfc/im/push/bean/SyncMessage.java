@@ -12,7 +12,7 @@ public class SyncMessage {
 
     private long imAccountId;
 
-    private long registId;
+    private long registerId;
 
     private int msgType;
 
@@ -28,6 +28,8 @@ public class SyncMessage {
 
     private long createTime;
 
+    private String module;
+
     public SyncMessage() {
 
     }
@@ -36,7 +38,7 @@ public class SyncMessage {
         return thirdSyncMsg;
     }
 
-    public void setThirdSyncMsg(boolean thirdSyncMsg) {
+    public void setPushSyncMsg(boolean thirdSyncMsg) {
         this.thirdSyncMsg = thirdSyncMsg;
     }
 
@@ -64,12 +66,12 @@ public class SyncMessage {
         this.imAccountId = imAccountId;
     }
 
-    public long getRegistId() {
-        return registId;
+    public long getRegisterId() {
+        return registerId;
     }
 
-    public void setRegistId(long registId) {
-        this.registId = registId;
+    public void setRegisterId(long registerId) {
+        this.registerId = registerId;
     }
 
     public int getMsgType() {
@@ -128,6 +130,14 @@ public class SyncMessage {
         this.createTime = createTime;
     }
 
+    public String getModule(){
+        return module;
+    }
+
+    public void setModule(String module){
+        this.module=module;
+    }
+
     @Override
     public String toString() {
         return "SyncMessage{" +
@@ -135,7 +145,7 @@ public class SyncMessage {
                 ", notify=" + notify +
                 ", dialogId=" + dialogId +
                 ", imAccountId=" + imAccountId +
-                ", registId=" + registId +
+                ", registerId=" + registerId +
                 ", msgType=" + msgType +
                 ", msg=" + Arrays.toString(msg) +
                 ", syncKey=" + syncKey +
@@ -143,6 +153,7 @@ public class SyncMessage {
                 ", pkgName='" + pkgName + '\'' +
                 ", alias='" + alias + '\'' +
                 ", createTime=" + createTime +
+                ", module=" + module +
                 '}';
     }
 }

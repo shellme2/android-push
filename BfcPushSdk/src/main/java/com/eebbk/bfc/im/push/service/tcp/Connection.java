@@ -15,15 +15,11 @@ public interface Connection {
      * 发起连接
      * @param hostname 主机
      * @param port 主机端口
-     * @return true表示连接成功，false表示还没有连接成功
      */
     void connect(String hostname, int port);
 
     /**
      * 发起连接
-     *
-     * @param hostname
-     * @param port
      * @param isAlarm 是否是闹钟(alarm)唤醒连接任务
      * @param iConnectCallback 连接aidl回调
      */
@@ -34,7 +30,7 @@ public interface Connection {
     /**
      * 发送数据
      * @param data 数据
-     * @throws SyncException 发送数据失败将抛出异常
+     * @throws WriteDataException 发送数据失败将抛出异常
      */
     void send(byte[] data) throws WriteDataException;
 
@@ -50,7 +46,6 @@ public interface Connection {
 
     /**
      * 判断连接是否正常连接到远程服务器
-     *
      * @return true表示正常连接，false表示断开
      */
     boolean isConnected();

@@ -35,6 +35,9 @@ public class PushSyncResponseEntity extends ResponseEntity {
     @TagValue(15)
     private long createTime;
 
+    @TagValue(16)
+    private String module;
+
     @Override
     public int getRID() {
         return RID;
@@ -112,4 +115,21 @@ public class PushSyncResponseEntity extends ResponseEntity {
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
     }
+
+    public String getModule(){
+        return module;
+    }
+
+    public void setModule(String module){
+        this.module=module;
+    }
+
+    //"RID":100003,
+    // "alias":"M161000600",
+    // "code":200,
+    // "createTime":1479469091185,"
+    // message":[97,102,100,97,115,100,102,115,100,102,115,100,102],"
+    // msgId":"3e41b26692af11e5ab0cecf4bbdf1a90",
+    // "pkgName":"com.eebbk.bfc.demo.push",
+    // "syncKey":90
 }

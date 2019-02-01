@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 /**
  * TLV编码结果
+ * <p/>
+ * Created by lhd on 2015/09/26.
  */
 public class TLVEncodeResult {
 

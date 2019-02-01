@@ -8,12 +8,12 @@ public interface Command {
 	/**
 	 * 注册
 	 */
-	int REGIST_REQUEST = 1;
+	int REGISTER_REQUEST = 1;
 
 	/**
 	 * 注册响应
 	 */
-	int REGIST_RESPONSE = 2;
+	int REGISTER_RESPONSE = 2;
 
 	/**
 	 * 登录
@@ -39,12 +39,12 @@ public interface Command {
 	/**
 	 * 获取公钥请求
 	 */
-	int PUBLICKEY_REQUEST = 22;
+	int PUBLIC_KEY_REQUEST = 22;
 
 	/**
 	 * 获取公钥响应
 	 */
-	int PUBLICKEY_RESPONSE = 23;
+	int PUBLIC_KEY_RESPONSE = 23;
 
 	/**
 	 * 加密包装
@@ -70,6 +70,16 @@ public interface Command {
 	 * 推送别名和标签设置响应
 	 */
 	int PUSH_ALIAS_AND_TAG_RESPONSE = 101;
+
+	/**
+	 * 推送别名和标签设置请求
+	 */
+	int PUSH_ALIAS_CHECK_REQUEST = 117;
+
+	/**
+	 * 推送别名和标签设置响应
+	 */
+	int PUSH_ALIAS_CHECK_RESPONSE = 118;
 
 	/**
 	 * 推送同步触发请求
@@ -109,7 +119,7 @@ public interface Command {
 	/**
 	 * 其他错误响应
 	 */
-	int TIMEOUT_ERROE_RESPONSE = 1000;
+	int TIMEOUT_ERROR_RESPONSE = 1000;
 
 	int SEND_ERROR_RESPONSE = 1001;
 }

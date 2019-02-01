@@ -1,1 +1,3 @@
-include ':BfcPushDemo', ':BfcPushSdk', ':BfcPushDemo1'
+include ':BfcPushDemo'
+include ':BfcPushSdk'
+

@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="5dp"
@@ -6,44 +7,61 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_height="40dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
-        <Switch
-            android:id="@+id/push_sw"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:checked="true"
-            android:text="@string/push_start"/>
         <Button
-            android:id="@+id/clear_btn"
+            android:id="@+id/push_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="60dp"
-            android:text="@string/clear_message"/>
+            android:textColor="#ff000000"
+            android:text="@string/push_switch"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:textColor="#ff000000"
+            android:text="@string/result"
+            tools:ignore="RtlHardcoded" />
+        <TextView
+            android:id="@+id/push_result_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/push_start"
+            android:textColor="@android:color/holo_red_dark" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:textColor="#ff000000"
-            android:text="@string/push_message"/>
+            android:text="@string/push_message"
+            tools:ignore="RtlHardcoded" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="60dp"
+            android:layout_marginLeft="30dp"
             android:textColor="#ff000000"
-            android:text="@string/push_count"/>
+            android:text="@string/push_count"
+            tools:ignore="RtlHardcoded" />
         <TextView
             android:id="@+id/push_count_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@android:color/holo_red_dark"/>
+        <Button
+            android:id="@+id/clear_btn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="@string/clear_message"/>
     </LinearLayout>
 
     <View

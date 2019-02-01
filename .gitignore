@@ -4,6 +4,7 @@
 /.idea/libraries
 .DS_Store
 /build
+/gradle
 /captures
 .externalNativeBuild
 
@@ -19,3 +20,5 @@ out
 .idea
 apk
 .navigation
+/gradle
+.gradle

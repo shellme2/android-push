@@ -3,7 +3,7 @@ package com.eebbk.bfc.im.push.bean;
 import android.text.TextUtils;
 
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.util.InetAddressUtil;
+import com.eebbk.bfc.im.push.util.IpAddressUtil;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,7 +56,7 @@ public class HostInfo {
         start = System.currentTimeMillis();
         this.hostname = hostname;
         this.port = port;
-        isIPv4Format = InetAddressUtil.isIPv4Address(hostname);
+        isIPv4Format = IpAddressUtil.isIPv4Address(hostname);
         connectedSuccessCount = new AtomicInteger(0);
         connectedFailCount = new AtomicInteger(0);
         disconnectedCount = new AtomicInteger(0);
@@ -65,7 +65,6 @@ public class HostInfo {
 
     /**
      * 获取主机名
-     * @return
      */
     public String getHostname() {
         return hostname;
@@ -77,7 +76,6 @@ public class HostInfo {
 
     /**
      * 获取端口
-     * @return
      */
     public int getPort() {
         return port;
@@ -114,7 +112,7 @@ public class HostInfo {
         return disconnectedCount.get();
     }
 
-    public void inscreaseConnectCount() {
+    public void increaseConnectCount() {
         connectCount.incrementAndGet();
         update = System.currentTimeMillis();
     }
@@ -140,9 +138,6 @@ public class HostInfo {
 
     /**
      * 只要主机名和端口一直就任务这两个主机是一致的
-     *
-     * @param o
-     * @return
      */
     @Override
     public boolean equals(Object o) {

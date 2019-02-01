@@ -12,7 +12,7 @@ public class PushSyncRequestEntity extends RequestEntity {
     private int RID;
 
     @TagValue(10)
-    private long registId;
+    private long registerId;
 
     @TagValue(11)
     private String appKey;
@@ -42,12 +42,12 @@ public class PushSyncRequestEntity extends RequestEntity {
         this.RID = RID;
     }
 
-    public long getRegistId() {
-        return registId;
+    public long getRegisterId() {
+        return registerId;
     }
 
-    public void setRegistId(long registId) {
-        this.registId = registId;
+    public void setRegisterId(long registerId) {
+        this.registerId = registerId;
     }
 
     public String getAppKey() {

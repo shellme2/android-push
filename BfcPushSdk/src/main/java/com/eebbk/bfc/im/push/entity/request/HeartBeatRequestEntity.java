@@ -9,7 +9,6 @@ import com.eebbk.bfc.im.push.entity.Command;
 @CommandValue(Command.HEART_BEAT_REQUEST)
 public class HeartBeatRequestEntity extends RequestEntity {
 
-
     @Override
     public String toString() {
         return "HeartBeatRequestEntity{"+"Command=" + this.getCommand() + "}";

@@ -1,53 +1,86 @@
-<resources>
-    <string name="app_name">PushTest</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:ignore="MissingTranslation">PushTest</string>
 
     <!--mainactivity 主入口-->
-    <string name="interface_test">接口测试</string>
-    <string name="function_test">功能点测试</string>
-    <string name="whole_flow_test">整体流程测试</string>
-    <string name="performance_test">性能测试</string>
-    <string name="title_activity_defaut_flow">DefautFlowActivity</string>
+    <string name="basic_function_test" tools:ignore="MissingTranslation">基本功能测试</string>
+    <string name="performance_test" tools:ignore="MissingTranslation">性能测试</string>
+    <string name="safe_test" tools:ignore="MissingTranslation">安全测试</string>
+    <string name="limit_test" tools:ignore="MissingTranslation">极限测试</string>
+    <string name="other_test" tools:ignore="MissingTranslation">其他测试</string>
 
-    <!--flow 整体流程 -->
-    <string name="default_flow">默认设置流程</string>
-    <string name="custom_flow">自定义流程</string>
+    <!--性能测试-->
+    <string name="whole_flow_test" tools:ignore="MissingTranslation">整体流程测试</string>
 
-    <string name="push_start">推送开启</string>
-    <string name="push_stop">推送关闭</string>
-    <string name="clear_message">清除内容</string>
-    <string name="push_message">推送内容:</string>
-    <string name="push_count">接收推送数量:</string>
-    <string name="alias">别名:</string>
-    <string name="alias_hint">字符长度不大于40，不能为中文字符</string>
-    <string name="tags">标签:</string>
-    <string name="tags_hint">字符长度不大于40，不能为中文字符，多个标签用“，”隔开</string>
-    <string name="ok">确定</string>
+    <!--基本功能点测试 -->
+    <string name="default_flow" tools:ignore="MissingTranslation">默认设置流程</string>
+    <string name="custom_flow" tools:ignore="MissingTranslation">自定义流程</string>
+    <string name="interface_test" tools:ignore="MissingTranslation">接口测试</string>
+    <string name="function_test" tools:ignore="MissingTranslation">功能点测试</string>
 
-    <string name="debug_mode_setting">调试模式设置</string>
-    <string name="debug_mode_open">开启调试模式</string>
-    <string name="debug_mode_close">关闭调试模式</string>
-    <string name="debug_mode_value">调试模式高级设置</string>
+    <string name="push_start" tools:ignore="MissingTranslation">推送开启</string>
+    <string name="push_stop" tools:ignore="MissingTranslation">推送关闭</string>
+    <string name="clear_message" tools:ignore="MissingTranslation">清除内容</string>
+    <string name="push_message" tools:ignore="MissingTranslation">推送内容:</string>
+    <string name="push_count" tools:ignore="MissingTranslation">接收推送数量:</string>
+    <string name="alias" tools:ignore="MissingTranslation">别名:</string>
+    <string name="alias_hint" tools:ignore="MissingTranslation">只能以数字字母下划线组成的长度不能超过30个字符，不能为空，为空及不合规范程序都会停止运行</string>
+    <string name="tags" tools:ignore="MissingTranslation">标签:</string>
+    <string name="tags_hint" tools:ignore="MissingTranslation">可以不填；只能以数字字母下划线组成的长度不能超过40个字符，多个标签用“,”隔开，不合规范会程序停止运行</string>
+    <string name="ok" tools:ignore="MissingTranslation">确定</string>
 
-    <string name="receive_time">接收时间:</string>
+    <string name="debug_mode_setting" tools:ignore="MissingTranslation">调试模式设置</string>
+    <string name="debug_mode_open" tools:ignore="MissingTranslation">开启调试模式</string>
+    <string name="debug_mode_close" tools:ignore="MissingTranslation">关闭调试模式</string>
+    <string name="debug_mode_value" tools:ignore="MissingTranslation">调试模式高级设置</string>
+
+    <string name="debug_mode_is_open" tools:ignore="MissingTranslation">调试模式是否打开</string>
+
+    <string name="receive_time" tools:ignore="MissingTranslation">接收时间:</string>
 
     <!--interface 接口 -->
-    <string name="init_interface">初始化接口</string>
-    <string name="debug_interface">调试接口</string>
-    <string name="debug_value_interface">带参数的调试接口</string>
-    <string name="debug_value">参数设置</string>
+    <string name="init_interface" tools:ignore="MissingTranslation">初始化接口</string>
+    <string name="init_alias_interface" tools:ignore="MissingTranslation">带别名的初始化接口</string>
+    <string name="debug_interface" tools:ignore="MissingTranslation">调试接口</string>
 
-    <string name="alias_and_tags_interface">别名标签设置接口</string>
-    <string name="alias_interface">别名设置接口</string>
-    <string name="tags_interface">标签设置接口</string>
-    <string name="version_interface">获取版本号接口</string>
-    <string name="trigger_interface">主动拉取接口</string>
-    <string name="stop_interface">停止推送接口</string>
-    <string name="is_stop_interface">是否停止推送接口</string>
-    <string name="resume_interface">重新开始推送接口</string>
+    <string name="debug_value_interface" tools:ignore="MissingTranslation">带参数的调试接口</string>
+    <string name="debug_ip" tools:ignore="MissingTranslation">预埋ip</string>
+    <string name="debug_ip_value" tools:ignore="MissingTranslation">ip：</string>
+    <string name="debug_ip_is_cover" tools:ignore="MissingTranslation">是否覆盖：</string>
+    <string name="debug_ip_hint" tools:ignore="MissingTranslation">预埋ip和端口号,必须是xx.xx.xx.xx:port格式,多个以“,”隔开</string>
+    <string name="debug_heat_beat" tools:ignore="MissingTranslation">心跳相关</string>
+    <string name="debug_heat_beat_nim" tools:ignore="MissingTranslation">最小心跳：</string>
+    <string name="debug_heat_beat_max" tools:ignore="MissingTranslation">最大心跳：</string>
+    <string name="debug_heat_beat_step" tools:ignore="MissingTranslation">心跳步长：</string>
+    <string name="debug_heat_beat_unit" tools:ignore="MissingTranslation">s</string>
 
-    <string name="time_consuming">耗时：</string>
-    <string name="result">结果：</string>
-    <string name="open">开启</string>
-    <string name="close">关闭</string>
+    <string name="debug_value" tools:ignore="MissingTranslation">参数设置</string>
 
+    <string name="alias_and_tags_interface" tools:ignore="MissingTranslation">别名标签设置接口</string>
+    <string name="alias_interface" tools:ignore="MissingTranslation">别名设置接口</string>
+    <string name="tags_interface" tools:ignore="MissingTranslation">标签设置接口</string>
+    <string name="version_interface" tools:ignore="MissingTranslation">获取版本号接口</string>
+    <string name="trigger_interface" tools:ignore="MissingTranslation">主动拉取接口</string>
+    <string name="stop_interface" tools:ignore="MissingTranslation">停止推送接口</string>
+    <string name="is_stop_interface" tools:ignore="MissingTranslation">是否停止推送接口</string>
+    <string name="resume_interface" tools:ignore="MissingTranslation">重新开始推送接口</string>
+
+    <string name="time_consuming" tools:ignore="MissingTranslation">耗时：</string>
+    <string name="result" tools:ignore="MissingTranslation">结果：</string>
+    <string name="open" tools:ignore="MissingTranslation">开启</string>
+    <string name="close" tools:ignore="MissingTranslation">关闭</string>
+    <string name="push_switch" tools:ignore="MissingTranslation">推送开关</string>
+
+    <string name="version_info" tools:ignore="MissingTranslation">版本信息</string>
+
+    <string name="is_check" tools:ignore="MissingTranslation">是否检测</string>
+
+
+    <string name="action_settings" tools:ignore="MissingTranslation">Settings</string>
+
+    <string name="no_permissions" tools:ignore="MissingTranslation">应用需要必要的运行权限</string>
+
+    <string name="settings" tools:ignore="MissingTranslation">设置</string>
+    <string name="help" tools:ignore="MissingTranslation">帮助</string>
+    <string name="string_help_text" tools:ignore="MissingTranslation">当前应用缺少必要权限。\n\n请点击\"设置\"-\"权限\"-打开所需权限。\n\n最后点击两次后退按钮，即可返回。</string>
+    <string name="quit" tools:ignore="MissingTranslation">退出</string>
 </resources>

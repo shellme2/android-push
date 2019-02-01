@@ -1,10 +1,16 @@
 ext {
-    android = [
-            compileSdkVersion: 23,
-            buildToolsVersion: "24.0.0",
-            minSdkVersion    : 17,
-            targetSdkVersion : 24,
-            versionCode      : 1,
-            versionName      : "0.0.3"
+    BUILD_BRANCH_NAME='develop'
+    // 配置demo以及所有sdk的版本名称,上传库到私有maven仓库时需配置此项
+    // 名称中以“-beta”结尾将会上传到maven快照仓库中，去掉即可上传到正式发布仓库
+
+    VERSION_NAME = '5.0.47'
+
+    VERSION_CODE = 122
+
+    dependencies = [
+            // demo v7包
+            "appcompat-v7"            : 'com.android.support:appcompat-v7:23.4.0',
+            // demo 测试用
+            "bfc-push"                : 'com.eebbk.bfc:bfc-push:3.0.6-beta',
     ]
 }

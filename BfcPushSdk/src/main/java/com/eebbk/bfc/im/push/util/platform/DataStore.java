@@ -4,9 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.util.Base64;
-import android.util.Log;
 
 import com.eebbk.bfc.im.push.util.LogUtils;
 
@@ -34,10 +32,7 @@ public class DataStore implements SharedPreferences {
     private int mode;
 
     private DataStore(Context context) {
-        mode = Activity.MODE_PRIVATE;
-        if(Build.VERSION.SDK_INT > 11) {
-            this.mode = Activity.MODE_MULTI_PROCESS;
-        }
+        this.mode = Activity.MODE_MULTI_PROCESS;
         sharedPreferences = context.getSharedPreferences("com.eebbk.bfc.im", mode);
     }
 
@@ -60,25 +55,25 @@ public class DataStore implements SharedPreferences {
      */
     public <T> boolean putObject(String key, T t) {
         boolean result = false;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(baos);
+            oos = new ObjectOutputStream(bos);
             oos.writeObject(t);
-            String objectDataString = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+            String objectDataString = Base64.encodeToString(bos.toByteArray(), Base64.DEFAULT);
             if (sharedPreferences != null) {
                 Editor editor = this.edit();
                 editor.putString(key, objectDataString);
                 result = editor.commit();
             } else {
-                Log.e(TAG, "sharedPreferences is null.");
+                LogUtils.e(TAG, "sharedPreferences is null.");
                 result = false;
             }
         } catch (IOException e) {
             LogUtils.e(e);
         } finally {
             try {
-                baos.close();
+                bos.close();
                 if (oos != null)
                     oos.close();
             } catch (IOException e) {
@@ -96,10 +91,10 @@ public class DataStore implements SharedPreferences {
         T t = null;
         if (data == null)
             return null;
-        ByteArrayInputStream bais = new ByteArrayInputStream(Base64.decode(data, Base64.DEFAULT));
+        ByteArrayInputStream bis = new ByteArrayInputStream(Base64.decode(data, Base64.DEFAULT));
         ObjectInputStream ois = null;
         try {
-            ois = new ObjectInputStream(bais);
+            ois = new ObjectInputStream(bis);
             t = (T) ois.readObject();
         } catch (StreamCorruptedException e) {
             LogUtils.e(e);
@@ -109,7 +104,7 @@ public class DataStore implements SharedPreferences {
             LogUtils.e(e);
         } finally {
             try {
-                bais.close();
+                bis.close();
                 if (ois != null)
                     ois.close();
             } catch (IOException e) {
@@ -134,10 +129,10 @@ public class DataStore implements SharedPreferences {
         List<T> l = null;
         if (data == null)
             return null;
-        ByteArrayInputStream bais = new ByteArrayInputStream(Base64.decode(data, Base64.DEFAULT));
+        ByteArrayInputStream bis = new ByteArrayInputStream(Base64.decode(data, Base64.DEFAULT));
         ObjectInputStream ois = null;
         try {
-            ois = new ObjectInputStream(bais);
+            ois = new ObjectInputStream(bis);
             l = (List<T>) ois.readObject();
         } catch (StreamCorruptedException e) {
             LogUtils.e(e);
@@ -147,7 +142,7 @@ public class DataStore implements SharedPreferences {
             LogUtils.e(e);
         } finally {
             try {
-                bais.close();
+                bis.close();
                 if (ois != null)
                     ois.close();
             } catch (IOException e) {

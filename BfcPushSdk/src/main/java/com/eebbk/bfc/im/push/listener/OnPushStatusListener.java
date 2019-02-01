@@ -1,26 +1,25 @@
 package com.eebbk.bfc.im.push.listener;
 
+/**
+ * 返回当前推送状态给上层
+ * 2017/11/7
+ * @author hesn
+ */
+
 public interface OnPushStatusListener {
 
-    int DISCONNECTED = 0;
-
-    int CONNECTING = 1;
-
-    int CONNECTED = 2;
-
-    int CONNECT_FAILED = 3;
-
     /**
-     * IM连接状态监听
-     *
-     * @param connectStatus true表示已连接，false表示未连接
+     * 返回推送状态
+     * @param status {@link Status#RECEIVE 接收到推送消息}
+     * @param values
      */
-    void onConnectStatus(int connectStatus);
+    void onPushStatus(int status, Object...values);
 
-    /**
-     * IM设备登录监听
-     *
-     * @param registerId
-     */
-    void onLogin(long registerId);
+    interface Status{
+        int RECEIVE = 1;
+        int LOG = 2;
+        int ERROR = 3;
+        int CONNECTED = 4;
+        int DISCONNECTED = 5;
+    }
 }

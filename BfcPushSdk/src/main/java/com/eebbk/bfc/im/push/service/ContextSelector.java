@@ -2,6 +2,7 @@ package com.eebbk.bfc.im.push.service;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 
 import com.eebbk.bfc.im.push.bean.AppPushInfo;
 import com.eebbk.bfc.im.push.entity.Command;
@@ -9,48 +10,39 @@ import com.eebbk.bfc.im.push.entity.response.ResponseEntity;
 import com.eebbk.bfc.im.push.entity.response.push.PushSyncFinResponseEntity;
 import com.eebbk.bfc.im.push.entity.response.push.PushSyncInformResponseEntity;
 import com.eebbk.bfc.im.push.entity.response.push.PushSyncResponseEntity;
-import com.eebbk.bfc.im.push.util.LogUtils;
+import com.eebbk.bfc.im.push.error.ErrorCode;
 import com.eebbk.bfc.im.push.util.AppUtil;
 import com.eebbk.bfc.im.push.util.IDUtil;
+import com.eebbk.bfc.im.push.util.LogUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ContextSelector {
 
+    private static final String TAG = "ContextSelector";
+
     public static Context selectContextByPkgName(Context hostCtx, String pkgName) {
+        if(hostCtx == null || TextUtils.isEmpty(pkgName)){
+            return null;
+        }
         Context targetContext = null;
         try {
+            LogUtils.w(TAG,"selectContextByPkgName context and packageName is :"+hostCtx+"::"+pkgName);
             targetContext = hostCtx.createPackageContext(pkgName, Context.CONTEXT_IGNORE_SECURITY);
         } catch (PackageManager.NameNotFoundException e) {
-            LogUtils.e(e);
+            LogUtils.e(TAG, ErrorCode.EC_RECEIVE_DATA_PACKAGE_NULL,e);
         }
         return targetContext;
     }
 
-    public static List<Context> selectContextByDialogId(Context hostCtx, long dialogId, Map<String, List<String>> dialogIdInfoMap) {
-        LogUtils.i("dialogIdInfoMap:" + dialogIdInfoMap);
-        List<Context> list = new ArrayList<>();
-        for (Map.Entry<String, List<String>> entry : dialogIdInfoMap.entrySet()) {
-            List<String> dialogIds = entry.getValue();
-            String dialogIdStr = String.valueOf(dialogId);
-            if (dialogIds.contains(dialogIdStr)) {
-                Context targetContext = selectContextByPkgName(hostCtx, entry.getKey());
-                if (targetContext != null) {
-                    list.add(targetContext);
-                    LogUtils.i("selectContextByDialogId,dialogId:" + dialogIdStr + ",pkgName:" + targetContext.getPackageName());
-                }
-            }
-
-        }
-        return list;
-    }
-
     public static Context selectContextByRid(Context hostCtx, int rid, Map<String, AppPushInfo> bindPkgNameMap) {
-        LogUtils.i("bindPkgNameMap:" + bindPkgNameMap);
+//        LogUtils.i("bindPkgNameMap:" + bindPkgNameMap);
         Context targetContext = null;
-        for (Map.Entry<String, AppPushInfo> entry : bindPkgNameMap.entrySet()) {
+        Map<String, AppPushInfo> map = new HashMap<>(bindPkgNameMap);
+        for (Map.Entry<String, AppPushInfo> entry : map.entrySet()) {
             AppPushInfo appPushInfo = entry.getValue();
             if (appPushInfo == null) {
                 LogUtils.w("appPushInfo is null,pkgName:" + entry.getKey());
@@ -66,7 +58,13 @@ public class ContextSelector {
         return targetContext;
     }
 
-    public static List<Context> selectReveiveContexts(Context context, ResponseEntity responseEntity
+    /**
+     * Class: ContextSelector
+     * Tag: 宿主选择
+     * Ref: ConnectionService.deliverResponseEntity()
+     * Fun: 筛选出对应的app
+     */
+    public static List<Context> selectReceiveContexts(Context context, ResponseEntity responseEntity
             , Map<String, AppPushInfo> bindPkgNameMap) {
         int command = responseEntity.getCommand();
         List<Context> contextList = new ArrayList<>();
@@ -101,7 +99,7 @@ public class ContextSelector {
             if (command == Command.PUSH_SYNC_INFORM) { // 推送同步通知用包名来分发
                 PushSyncInformResponseEntity pushSyncInformResponseEntity = (PushSyncInformResponseEntity) responseEntity;
 
-                LogUtils.e("response for dispatcher packagename:  " + pushSyncInformResponseEntity.getPkgName());
+                LogUtils.e(TAG, "response for dispatcher package name:  " + pushSyncInformResponseEntity.getPkgName());
 
                 Context pkgNameContext = ContextSelector.selectContextByPkgName(context, pushSyncInformResponseEntity.getPkgName());
                 if (pkgNameContext != null) {
@@ -109,7 +107,7 @@ public class ContextSelector {
                 }
             } else {
                 // 原则上这里是永远不会跑到的
-                LogUtils.e("error response:" + responseEntity);
+                LogUtils.e(TAG, "error response:" + responseEntity);
             }
         }
         return contextList;

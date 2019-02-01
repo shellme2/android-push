@@ -1,6 +1,5 @@
 package com.eebbk.bfc.im.push.service.task;
 
-import com.eebbk.bfc.im.push.service.task.Task;
 import com.eebbk.bfc.im.push.util.LogUtils;
 
 import java.util.ArrayDeque;
@@ -13,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskExecutor {
+    private static final String TAG = "TaskExecutor";
 
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
@@ -74,7 +74,7 @@ public class TaskExecutor {
             if (!THREAD_POOL_EXECUTOR.isShutdown()) {
                 THREAD_POOL_EXECUTOR.execute(mActive);
             } else {
-                LogUtils.e("THREAD_POOL_EXECUTOR is shutdown!!!");
+                LogUtils.e( TAG, "THREAD_POOL_EXECUTOR is shutdown!!!");
             }
         }
     }
@@ -126,7 +126,7 @@ public class TaskExecutor {
     }
 
     public synchronized void executeCacheTasks() {
-        Task task = null;
+        Task task ;
         while ((task = cacheTasks.poll()) != null) {
             execute(task);
         }

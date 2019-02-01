@@ -2,8 +2,8 @@ package com.eebbk.bfc.im.push.response;
 
 import android.text.TextUtils;
 
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,31 +13,26 @@ import java.util.concurrent.ConcurrentHashMap;
  * 管理各个会话对应的同步序号值，供同步请求使用
  */
 public class SyncKeyManager {
-
-    private Map<String, Long> localSyncKeyMap = new ConcurrentHashMap<>();
-
-    private Map<String, Long> serverSyncKeyMap = new ConcurrentHashMap<>();
+    private static final String TAG = "SyncKeyManager";
 
     private Map<String, Long> pushLocalSyncKeyMap = new ConcurrentHashMap<>();
 
     private Map<String, Long> pushServerSyncKeyMap = new ConcurrentHashMap<>();
 
-    private SyncApplication app;
+    private PushApplication app;
 
-    public SyncKeyManager(SyncApplication app) {
+    public SyncKeyManager(PushApplication app) {
         this.app = app;
     }
 
     public void clear() {
-        localSyncKeyMap.clear();
-        serverSyncKeyMap.clear();
         pushLocalSyncKeyMap.clear();
         pushServerSyncKeyMap.clear();
     }
 
     public void putPushLocalSyncKey(String pgkName, String alias, long syncKey) {
         if (TextUtils.isEmpty(pgkName) || TextUtils.isEmpty(alias)) {
-            LogUtils.e("pgkName:" + pgkName + ",alias:" + alias);
+            LogUtils.e(TAG,  "pgkName:" + pgkName + ",alias:" + alias);
             return;
         }
         String key = String.valueOf(pgkName + "_" + alias);
@@ -57,7 +52,7 @@ public class SyncKeyManager {
 
     public void putPushServerSyncKey(String pkgName, String alias, long syncKey) {
         if (TextUtils.isEmpty(pkgName) || TextUtils.isEmpty(alias)) {
-            LogUtils.e("pkgName:" + pkgName + ",alias:" + alias);
+            LogUtils.e(TAG,   "pkgName:" + pkgName + ",alias:" + alias);
             return;
         }
         String key = String.valueOf(pkgName + "_" + alias);

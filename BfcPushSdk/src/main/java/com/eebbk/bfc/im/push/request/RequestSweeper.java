@@ -5,8 +5,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,7 +16,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RequestSweeper {
 
-    private SyncApplication app;
+    private static final String TAG = "RequestSweeper";
+
+    private PushApplication app;
 
     private SweepHandler sweepHandler;
 
@@ -56,7 +58,7 @@ public class RequestSweeper {
         }
     }
 
-    public RequestSweeper(SyncApplication app) {
+    public RequestSweeper(PushApplication app) {
         this.app = app;
         HandlerThread handlerThread = new HandlerThread(SweepHandler.class.getSimpleName());
         handlerThread.start();
@@ -68,10 +70,10 @@ public class RequestSweeper {
         if (requestManager == null) {
             return;
         }
-        LogUtils.v("sweep request...");
+        LogUtils.v(TAG,"sweep request...");
         int clearCount = requestManager.dispatchTimeoutRequest();
         if (clearCount > 0) {
-            LogUtils.d("dispatch [" + clearCount + "] time out requests.");
+            LogUtils.d(TAG,"dispatch [" + clearCount + "] time out requests.");
         }
     }
 
@@ -80,12 +82,12 @@ public class RequestSweeper {
      */
     public void start() {
         if (started.get()) {
-            LogUtils.w("request sweeper is started.");
+            LogUtils.w(TAG,"request sweeper is started.");
             return;
         }
 //        WakeLockUtil.acquire(app.getContext(), 60000);
         started.set(true);
-        LogUtils.d("request sweeper started.");
+        LogUtils.d(TAG,"request sweeper started.");
         sweepHandler.sendEmptyMessageDelayed(1, 1000);
     }
 
@@ -98,7 +100,7 @@ public class RequestSweeper {
     }
 
     public void cancel() {
-        LogUtils.w("cancel request sweeper.");
+        LogUtils.w(TAG,"cancel request sweeper.");
         started.set(false);
 //        WakeLockUtil.release();
     }

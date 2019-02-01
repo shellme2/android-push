@@ -1,8 +1,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="正在开发中，敬请期待......"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/start_service1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动服务1"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/start_service2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动服务2"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/start_service3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动服务3"
+        tools:ignore="HardcodedText" />
 
 </LinearLayout>

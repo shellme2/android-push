@@ -1,23 +1,24 @@
 package com.eebbk.bfc.im.push.response.handler;
 
-import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.request.Request;
 import com.eebbk.bfc.im.push.response.Response;
+import com.eebbk.bfc.im.push.util.LogUtils;
 
 public class SendErrorHandler extends SyncHandler {
+    private static final String TAG = "SendErrorHandler";
 
-    public SendErrorHandler(SyncApplication app) {
+    public SendErrorHandler(PushApplication app) {
         super(app);
     }
 
     @Override
     public void handle(Request request, Response response) {
         if (request != null) {
-            LogUtils.e("local send error,retry send request:" + request.getRequestEntity());
+            LogUtils.e( TAG, "local send error,retry send request:" + request.getRequestEntity());
             handleSendErrorRequest(request);
         } else {
-            LogUtils.e("local send error,request is null!");
+            LogUtils.e( TAG, "local send error,request is null!");
         }
     }
 

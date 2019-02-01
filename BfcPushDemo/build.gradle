@@ -1,25 +1,31 @@
 apply plugin: 'com.android.application'
+//apply plugin: 'com.getkeepsafe.dexcount'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "24.0.0"
-    defaultConfig {
-        applicationId "com.eebbk.bfc.demo.push"
-        minSdkVersion 21
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    compileSdkVersion bfcBuildConfig.compileSdkVersion
+    buildToolsVersion bfcBuildConfig.buildToolsVersion
+
+    lintOptions {
+        abortOnError false
     }
 
     // 签名
     signingConfigs {
         release {
-            keyAlias 'eebbkopen'
-            keyPassword 'eebbkopen'
+            keyAlias bfcBuildConfig.signing["keyAlias"]
+            keyPassword bfcBuildConfig.signing["keyPassword"]
             storeFile file('keystore.jks')
-            storePassword 'eebbkopen'
+            storePassword bfcBuildConfig.signing["storePassword"]
         }
+    }
+
+    defaultConfig {
+        applicationId 'com.eebbk.bfc.demo.push'
+        minSdkVersion 20
+        targetSdkVersion bfcBuildConfig.targetSdkVersion
+        versionCode VERSION_CODE as int
+        versionName VERSION_NAME
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -37,6 +43,70 @@ android {
         }
     }
 
+    packagingOptions {
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/LICENSE.txt'
+    }
+
+
+    // 打包渠道List,外发
+    productFlavors {
+        im {
+            manifestPlaceholders = [APP_NAME    : "PushTest", PACKAGE_NAME: "com.eebbk.bfc.demo.push",
+//                                    SYNC_APP_KEY: "983cbadb6dd7446e9704654b1d8e775a", SYNC_RID_TAG: "1",//test
+                                    SYNC_APP_KEY: "971881d79f244583b794d5a35d1cc0fa", SYNC_RID_TAG: "1",//relase
+                                    MI_APP_KEY  : "MI:5881753311076", MI_APP_ID: "MI:2882303761517533076",
+                                    APP_CHANNEL : "PushTest"]
+
+            applicationId 'com.eebbk.bfc.demo.push'
+            minSdkVersion 20
+            targetSdkVersion bfcBuildConfig.targetSdkVersion
+            versionCode VERSION_CODE as int
+            versionName VERSION_NAME
+
+
+        }
+        im1 {
+            manifestPlaceholders = [APP_NAME    : "PushTest1", PACKAGE_NAME: "com.eebbk.bfc.demo.push_1",
+//                                    SYNC_APP_KEY: "9e57050646b64b32bf0cc1195fb99db5", SYNC_RID_TAG: "2",//test
+                                    SYNC_APP_KEY: "857d6542556d4d16b82b1363dc2fab7f", SYNC_RID_TAG: "2",//relase
+                                    MI_APP_KEY  : "MI:5711753344079", MI_APP_ID: "MI:2882303761517533079",
+                                    APP_CHANNEL : "PushTest1"]
+
+            applicationId 'com.eebbk.bfc.demo.push_1'
+            minSdkVersion 20
+            targetSdkVersion bfcBuildConfig.targetSdkVersion
+            versionCode VERSION_CODE as int
+            versionName VERSION_NAME
+        }
+        common{
+            manifestPlaceholders = [APP_NAME    : "PushTest", PACKAGE_NAME: "com.eebbk.bfc.demo.push",
+                                    SYNC_APP_KEY: "983cbadb6dd7446e9704654b1d8e775a", SYNC_RID_TAG: "1",//test
+//                                    SYNC_APP_KEY: "971881d79f244583b794d5a35d1cc0fa", SYNC_RID_TAG: "1",//relase
+                                    MI_APP_KEY  : "MI:5881753311076", MI_APP_ID: "MI:2882303761517533076",
+                                    APP_CHANNEL : "PushCommonTest"]
+
+            applicationId 'com.eebbk.bfc.demo.push'
+            minSdkVersion 20
+            targetSdkVersion bfcBuildConfig.targetSdkVersion
+            versionCode VERSION_CODE as int
+            versionName VERSION_NAME
+        }
+        common1{
+            manifestPlaceholders = [APP_NAME    : "PushTest1", PACKAGE_NAME: "com.eebbk.bfc.demo.push_1",
+                                    SYNC_APP_KEY: "9e57050646b64b32bf0cc1195fb99db5", SYNC_RID_TAG: "2",//test
+//                                    SYNC_APP_KEY: "857d6542556d4d16b82b1363dc2fab7f", SYNC_RID_TAG: "2",//relase
+                                    MI_APP_KEY  : "MI:5711753344079", MI_APP_ID: "MI:2882303761517533079",
+                                    APP_CHANNEL : "PushCommonTest1"]
+
+            applicationId 'com.eebbk.bfc.demo.push_1'
+            minSdkVersion 20
+            targetSdkVersion bfcBuildConfig.targetSdkVersion
+            versionCode VERSION_CODE as int
+            versionName VERSION_NAME
+        }
+    }
+
     // 修改apk名称，并放到apk目录下
     android.applicationVariants.all { variant ->
         variant.outputs.each { output ->
@@ -51,17 +121,33 @@ android {
     }
 }
 
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    testCompile bfcBuildConfig.deps["junit"]
 
-    // 导入sdk包
-//    compile 'com.eebbk.bfc:bfc-push:0.0.3'
-    compile project(':BfcPushSdk')
+    compile 'com.squareup.leakcanary:leakcanary-android:1.5'
+//    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    // 只在debug模式下工作
+    compile bfcBuildConfig.deps["bfc-blockcanary"]
+    testCompile bfcBuildConfig.deps["bfc-blockcanary-no-op"]
 
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
-    testCompile 'junit:junit:4.12'
+    compile rootProject.ext.dependencies["appcompat-v7"]
+    // 导入下载sdk包
+//    imCompile rootProject.ext.dependencies["bfc-push"]
+//    im1Compile rootProject.ext.dependencies["bfc-push"]
+//    compile bfcBuildConfig.deps.'bfc-push'
+//    compile 'com.eebbk.bfc:bfc-push:3.1.5-bugfix'
+    compile bfcBuildConfig.deps["bfc-http"]
+
+    commonCompile project(path: ":BfcPushSdk", configuration: 'commonRelease')
+    common1Compile project(path: ":BfcPushSdk", configuration: 'commonRelease')
+    imCompile project(path: ':BfcPushSdk', configuration: 'imRelease')
+    im1Compile project(path: ':BfcPushSdk', configuration: 'imRelease')
+
+    compile bfcBuildConfig.deps["bfc-behavior"]
 }

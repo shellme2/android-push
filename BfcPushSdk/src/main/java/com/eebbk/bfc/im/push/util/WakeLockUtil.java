@@ -30,7 +30,7 @@ public class WakeLockUtil {
 
     public synchronized static void acquire(Context context, int timeout) {
         if (wakeLock == null) {
-            wakeLock = createWakeLock(context, "WakeLock");
+            wakeLock = createWakeLock(context, "bfc-push-connect-lock");
             wakeLock.acquire(timeout);
         } else {
             if (!wakeLock.isHeld()) {

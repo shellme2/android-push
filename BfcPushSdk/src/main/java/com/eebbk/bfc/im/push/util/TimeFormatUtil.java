@@ -2,6 +2,7 @@ package com.eebbk.bfc.im.push.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class TimeFormatUtil {
 
@@ -13,6 +14,6 @@ public class TimeFormatUtil {
             milliseconds = 1000;
         }
         Date date = new Date(milliseconds - 8 * 3600 * 1000);
-        return new SimpleDateFormat("HH:mm:ss").format(date);
+        return new SimpleDateFormat("HH:mm:ss", Locale.US).format(date);
     }
 }

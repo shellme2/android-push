@@ -10,18 +10,12 @@ public interface OnConnectListener {
 
 	/**
 	 * 连接成功
-	 *
 	 * @param socketSecretKey 每次连接的随机uuid
-	 * @param hostname
-     * @param port
      */
 	void onConnected(byte[] socketSecretKey, String hostname, int port);
 
 	/**
 	 * 开始尝试连接
-	 *
-	 * @param hostname
-	 * @param port
      */
 	void onStartConnect(String hostname, int port);
 
@@ -32,10 +26,6 @@ public interface OnConnectListener {
 
 	/**
 	 * 连接失败
-	 *
-	 * @param error
-	 * @param hostname
-	 * @param port
      */
 	void onFailed(ConnectException error, String hostname, int port);
 }

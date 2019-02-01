@@ -5,6 +5,8 @@ import java.util.List;
 
 /**
  * TLV解码结果
+ * <p/>
+ * Created by lhd on 2015/09/26.
  */
 public class TLVDecodeResult {
 
@@ -121,7 +123,7 @@ public class TLVDecodeResult {
     public String toString() {
         String v = null;
         if (dataType == TLVEncoder.ConstructedData) {
-            v = value.toString();
+            v = value != null ? value.toString() : null;
         } else {
             v = Arrays.toString((byte[]) value);
         }

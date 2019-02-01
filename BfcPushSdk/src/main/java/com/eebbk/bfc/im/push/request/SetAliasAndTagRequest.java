@@ -1,12 +1,12 @@
 package com.eebbk.bfc.im.push.request;
 
-import com.eebbk.bfc.im.push.bean.SyncRegistInfo;
+import com.eebbk.bfc.im.push.PushApplication;
+import com.eebbk.bfc.im.push.bean.SyncRegisterInfo;
 import com.eebbk.bfc.im.push.entity.request.RequestEntity;
 import com.eebbk.bfc.im.push.entity.request.push.AliasAndTagsRequestEntity;
 import com.eebbk.bfc.im.push.listener.OnGetCallBack;
 import com.eebbk.bfc.im.push.listener.OnReceiveListener;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
 import com.eebbk.bfc.im.push.util.RandomUtil;
 import com.eebbk.bfc.im.push.util.TimeFormatUtil;
 
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class SetAliasAndTagRequest extends Request {
 
-    public SetAliasAndTagRequest(SyncApplication app, RequestEntity requestEntity, OnReceiveListener onReceiveListener) {
+    public SetAliasAndTagRequest(PushApplication app, RequestEntity requestEntity, OnReceiveListener onReceiveListener) {
         super(app, requestEntity);
         this.isNeedResponse = true;
         // 无限重试
@@ -29,12 +29,16 @@ public class SetAliasAndTagRequest extends Request {
         final String alias = aliasAndTagsRequestEntity.getAlias();
         final List<String> tag = aliasAndTagsRequestEntity.getTagsList();
 
-        app.getSyncRegistInfoSafely(new OnGetCallBack<SyncRegistInfo>() {
+        app.getSyncRegisterInfoSafely(new OnGetCallBack<SyncRegisterInfo>() {
             @Override
-            public void onGet(SyncRegistInfo syncRegistInfo) {
-                AliasAndTagsRequestEntity entity = app.getRequestEntityFactory().createAliasAndTagRequestEntity(alias, tag, syncRegistInfo.getRegistId());
+            public void onGet(SyncRegisterInfo syncRegisterInfo) {
+                if(syncRegisterInfo == null){
+                    LogUtils.e("SetAliasAndTagRequest","syncRegisterInfo is null ,just stop login !!! ");
+                    return;
+                }
+                AliasAndTagsRequestEntity entity = app.getRequestEntityFactory().createAliasAndTagRequestEntity(alias, tag, syncRegisterInfo.getRegisterId());
                 requestEntity = entity;
-                LogUtils.d("to retry set alais and tag,entity:" + requestEntity);
+                LogUtils.d("to retry set alias and tag,entity:" + requestEntity);
                 send();
             }
         });

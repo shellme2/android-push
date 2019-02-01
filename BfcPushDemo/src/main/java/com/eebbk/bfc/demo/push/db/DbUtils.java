@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.eebbk.bfc.demo.push.flow.MessageInfo;
+import com.eebbk.bfc.demo.push.basicfunction.MessageInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,7 @@ public class DbUtils {
 	public static List<MessageInfo> getAllMessage(){
 		List<MessageInfo> datas=new ArrayList<>();
 		Cursor cursor=query();
+
 		while (cursor.moveToNext()){
 			MessageInfo info=new MessageInfo();
 			info.setMsg(cursor.getString(cursor.getColumnIndex(DbHelper.COLUMN_MESSAGE_NAME)));

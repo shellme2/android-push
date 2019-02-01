@@ -4,7 +4,7 @@ import com.eebbk.bfc.im.push.anotation.CommandValue;
 import com.eebbk.bfc.im.push.anotation.TagValue;
 import com.eebbk.bfc.im.push.entity.Command;
 import com.eebbk.bfc.im.push.entity.Entity;
-import com.eebbk.bfc.im.push.util.GsonUtil;
+import com.eebbk.bfc.im.push.util.JsonUtil;
 
 /**
  * 加密数据包载体
@@ -28,6 +28,6 @@ public class EncryptWapper extends Entity {
 
     @Override
     public String toString() {
-        return GsonUtil.toJSON(this);
+        return JsonUtil.toJson(this);
     }
 }

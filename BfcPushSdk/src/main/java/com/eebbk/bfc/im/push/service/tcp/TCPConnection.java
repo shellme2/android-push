@@ -6,20 +6,27 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Process;
 import android.text.TextUtils;
 
 import com.eebbk.bfc.im.push.IConnectCallback;
-import com.eebbk.bfc.im.push.service.ConnectionService;
-import com.eebbk.bfc.im.push.service.host.HostInfoManager;
-import com.eebbk.bfc.im.push.service.task.TaskExecutor;
-import com.eebbk.bfc.im.push.util.LogUtils;
 import com.eebbk.bfc.im.push.bean.HostInfo;
+import com.eebbk.bfc.im.push.config.LogTagConfig;
+import com.eebbk.bfc.im.push.debug.DebugEventCode;
+import com.eebbk.bfc.im.push.debug.DebugEventTool;
+import com.eebbk.bfc.im.push.debug.da.Da;
+import com.eebbk.bfc.im.push.debug.da.DaInfo;
 import com.eebbk.bfc.im.push.exception.ConnectException;
 import com.eebbk.bfc.im.push.exception.WriteDataException;
 import com.eebbk.bfc.im.push.listener.OnConnectInterruptListener;
 import com.eebbk.bfc.im.push.listener.OnConnectListener;
+import com.eebbk.bfc.im.push.service.ConnectionService;
+import com.eebbk.bfc.im.push.service.heartbeat.heartpackage.HeartbeatScheduler;
+import com.eebbk.bfc.im.push.service.host.HostInfoManager;
+import com.eebbk.bfc.im.push.service.task.TaskExecutor;
 import com.eebbk.bfc.im.push.service.task.TaskType;
 import com.eebbk.bfc.im.push.util.IDUtil;
+import com.eebbk.bfc.im.push.util.LogUtils;
 import com.eebbk.bfc.im.push.util.RandomUtil;
 import com.eebbk.bfc.im.push.util.TimeFormatUtil;
 
@@ -35,11 +42,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TCPConnection implements Connection {
 
+    private static final String TAG = "TCPConnection";
+
     private Context context;
 
     /**
      * 客户端Socket
      */
+
     private Socket socket;
     private InputStream is;
     private OutputStream os;
@@ -115,7 +125,7 @@ public class TCPConnection implements Connection {
     public TCPConnection(Context context, String hostname, int port) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         initVar(hostname, port);
-        LogUtils.d(this.getClass().getSimpleName() + " created...");
+        LogUtils.d(TAG,this.getClass().getSimpleName() + " created...");
     }
 
     private void initVar(String hostname, int port) {
@@ -158,8 +168,6 @@ public class TCPConnection implements Connection {
 
     /**
      * 添加连接监听
-     *
-     * @param onConnectListener
      */
     public void setOnConnectListener(OnConnectListener onConnectListener) {
         this.onConnectListener = onConnectListener;
@@ -167,8 +175,6 @@ public class TCPConnection implements Connection {
 
     /**
      * 添加数据发送和接收监听
-     *
-     * @param onDataListener
      */
     public void setOnDataListener(ReadAndWriteDataThread.OnDataListener onDataListener) {
         if (readWriteThread != null) {
@@ -190,7 +196,7 @@ public class TCPConnection implements Connection {
     @Override
     public void connect(String hostname, int port, boolean isAlarm, IConnectCallback iConnectCallback) {
         if (TextUtils.isEmpty(hostname) || port <= 0 || port > 65535) {
-            LogUtils.e("hostname or port is error,hostname:" + hostname + ",port:" + port);
+            LogUtils.e(TAG,"hostname or port is error,hostname:" + hostname + ",port:" + port);
             LogUtils.test("hostname or port is error,hostname:" + hostname + ",port:" + port);
             return;
         }
@@ -212,7 +218,7 @@ public class TCPConnection implements Connection {
         if (readWriteThread != null) {
             readWriteThread.write(data);
         } else {
-            LogUtils.e("readWriteThread is null.");
+            LogUtils.e(TAG,"readWriteThread is null.");
             throw new WriteDataException("readWriteThread is null.");
         }
     }
@@ -232,7 +238,7 @@ public class TCPConnection implements Connection {
             closeSocket();
         }
         cancelAlarm(createPendingIntent(canUseHostInfo));
-        LogUtils.d("connection has close.");
+        LogUtils.d(TAG,"connection has close.");
     }
 
     @Override
@@ -244,7 +250,7 @@ public class TCPConnection implements Connection {
             }
             closeSocket();
         }
-        LogUtils.d("connection has release.");
+        LogUtils.d(TAG,"connection has release.");
     }
 
     /**
@@ -268,19 +274,18 @@ public class TCPConnection implements Connection {
      */
     private void reset() {
         connectTaskExecutor.cancelAll();
-        connectPeriodTag.set(0); //连接上后把连接间隔清零
-        LogUtils.i("to set the connectPeriodTag as 0:" + connectPeriodTag.get() + ",connectTaskPeriod:" + connectTaskPeriod);
+        LogUtils.i(TAG,LogTagConfig.LOG_TAG_POINT_SOCKET,"cancel all connect task " );
+        resetConnectPeriodTag(); //连接上后把连接间隔清零
     }
 
     protected void resetConnectPeriodTag() {
         connectPeriodTag.set(0);
+        LogUtils.i(TAG,LogTagConfig.LOG_TAG_POINT_SOCKET,"cancel all connect task ,to set the connectPeriodTag as 0:" + connectPeriodTag.get() + ",connectTaskPeriod:" + connectTaskPeriod);
+
     }
 
     /**
      * 开启一个数据读写线程
-     * @param in
-     * @param out
-     * @param hostInfo
      */
     private void startReadAndWriteThread(InputStream in, OutputStream out, final HostInfo hostInfo) {
         if (readWriteThread != null && readWriteThread.isAlive()) {
@@ -299,7 +304,7 @@ public class TCPConnection implements Connection {
                             // 如果连接异常中断则进行重连，如果是调用close()方法则不进行重连
                             reconnect();
                         } else {
-                            LogUtils.d("close connection successfully.");
+                            LogUtils.d(TAG,"close connection successfully.");
                         }
                     }
                 });
@@ -313,7 +318,8 @@ public class TCPConnection implements Connection {
     private void computeConnectedDuration() {
         disconnectedTime = System.currentTimeMillis();
         long connectedDuration = disconnectedTime - connectedTime;
-        LogUtils.w("connection is disconnected,connected time is:" + connectedTime
+        DebugEventTool.getInstance().event(System.currentTimeMillis(), Process.myPid()+"", DebugEventCode.DEBUG_EVENT_CODE_TCP_CONN_STATE,"连接中断", "");
+        LogUtils.e(TAG,LogTagConfig.LOG_TAG_FLOW_CONNECT_TCP,"Socket Connect Interrupt","connection is disconnected,connected time is:" + connectedTime
                 + ",disconnected time is:" + disconnectedTime
                 + ",connected time of duration is:" + connectedDuration
                 + ",connectedDuration format:" + TimeFormatUtil.format(connectedDuration));
@@ -338,44 +344,53 @@ public class TCPConnection implements Connection {
     }
 
     /**
-     * 开始连接
-     * @param hostInfo
+     * TCP Socket开始连接
      * @throws IOException
      */
-    public synchronized void connectImpl(HostInfo hostInfo) throws IOException {
+    synchronized void connectImpl(HostInfo hostInfo) throws IOException {
         if (hostInfo == null) {
-            LogUtils.e("hostinfo is null.");
-            throw new IOException("hostinfo is null.");
+            LogUtils.e(TAG, LogTagConfig.LOG_TAG_FLOW_CONNECT_TCP,"host info is null.");
+            throw new IOException("host info is null.");
         }
-        LogUtils.d("to close the previous socket before create a new socket...");
         releaseConnection();
         callOnStartConnect(hostInfo.getHostname(), hostInfo.getPort());
+        DebugEventTool.getInstance().event(System.currentTimeMillis(), Process.class.getName(), DebugEventCode.DEBUG_EVENT_CODE_TCP_CONN_STATE,
+                "连接开始", "【 HostName:"+ hostInfo.getHostname() + " ,Port: " + hostInfo.getPort()+"】");
+        LogUtils.i(TAG, LogTagConfig.LOG_TAG_FLOW_CONNECT_TCP,"Socket Connect Start","======>>> to close the previous socket then create a new socket...【 HostName:"+ hostInfo.getHostname() + ",Port: " + hostInfo.getPort()+"】" );
         Throwable myError = null;
-        hostInfo.inscreaseConnectCount();
+        hostInfo.increaseConnectCount();
         socket = new Socket();
         try {
+            Da.record(getContext(), new DaInfo().setFunctionName(Da.functionName.SOCKET_STATUS)
+                    .setTrigValue(Da.trigValue.CONNECTING)
+                    .setExtendRemotePort(String.valueOf(hostInfo.getPort()))
+                    .setExtendRemoteIp(hostInfo.getHostname()));
+            LogUtils.i(TAG, "start to connect push service {remoteAddress=" + hostInfo.getHostname() + ",remotePort=" + hostInfo.getPort() + "}");
             long start = System.currentTimeMillis();
             InetSocketAddress inetSocketAddress = new InetSocketAddress(hostInfo.getHostname(), hostInfo.getPort());
             long end = System.currentTimeMillis();
-            LogUtils.e("inetSocketAddress时间间隔(ms):" + (end - start));
+            LogUtils.e(TAG,"ipSocketAddress时间间隔(ms):" + (end - start));
 
             long startConn = System.currentTimeMillis();
             socket.connect(inetSocketAddress, timeout);
             long endConn = System.currentTimeMillis();
-            LogUtils.e("connect时间间隔(ms):" + (endConn - startConn));
+            LogUtils.i(TAG,"connect时间间隔(ms):" + (endConn - startConn));
 
             is = socket.getInputStream();
             os = socket.getOutputStream();
             afterConnected();
             startReadAndWriteThread(is, os, hostInfo);
             callOnConnected(IDUtil.getUUID().getBytes(), hostInfo.getHostname(), hostInfo.getPort());
-            LogUtils.i("connect to server success {remoteAddress=" + hostInfo.getHostname() + ",remotePort=" + hostInfo.getPort() + "}");
+
+            DebugEventTool.getInstance().event(System.currentTimeMillis(), Process.myPid()+"", DebugEventCode.DEBUG_EVENT_CODE_TCP_CONN_STATE,"连接成功", "【 HostName:"+ hostInfo.getHostname() + " ,Port: " + hostInfo.getPort()+"】");
+            LogUtils.i(TAG, LogTagConfig.LOG_TAG_FLOW_CONNECT_TCP,"Socket Connect Success","======>>> connect to server success 【 HostName:"+ hostInfo.getHostname() + " ,Port: " + hostInfo.getPort()+"】");
+            Da.record(getContext(), new DaInfo().setFunctionName(Da.functionName.SOCKET_STATUS)
+                    .setTrigValue(Da.trigValue.CONNECTED));
         } catch (IOException e) {
             myError = e;
             throw e;
         } catch (Throwable e) {
             myError = e;
-            LogUtils.e(e);
         } finally {
             if (myError == null) {
                 if (isConnected()) {
@@ -385,11 +400,15 @@ public class TCPConnection implements Connection {
                 }
             } else {
                 hostInfo.increaseFailCount();
+                DebugEventTool.getInstance().event(System.currentTimeMillis(), Process.myPid()+"", DebugEventCode.DEBUG_EVENT_CODE_TCP_CONN_STATE,"连接失败", "");
+                LogUtils.e(TAG, LogTagConfig.LOG_TAG_FLOW_CONNECT_TCP,"Socket Connect Error","increaseFailCount",myError);
+                Da.record(getContext(), new DaInfo().setFunctionName(Da.functionName.SOCKET_STATUS)
+                        .setTrigValue(Da.trigValue.DISCONNECT));
             }
         }
     }
 
-    public synchronized void callOnConnected(byte[] socketSecretKey, String hostname, int port) {
+    private synchronized void callOnConnected(byte[] socketSecretKey, String hostname, int port) {
         if (onConnectListener != null) {
             onConnectListener.onConnected(socketSecretKey, hostname, port);
         }
@@ -417,14 +436,14 @@ public class TCPConnection implements Connection {
         randomConnectPeriod();
         PendingIntent pendingIntent = createPendingIntent(hostInfo);
         startAlarm(pendingIntent, (long) connectTaskPeriod);
-        LogUtils.d("start retry alarm");
+        LogUtils.d(TAG,LogTagConfig.LOG_TAG_POINT_TCP,"start retry alarm,connectTaskPeriod="+connectTaskPeriod);
     }
 
     private void startReconnectAlarm(HostInfo hostInfo) {
         randomReconnectPeriod();
         PendingIntent pendingIntent = createPendingIntent(hostInfo);
         startAlarm(pendingIntent, (long) reconnectTaskPeriod);
-        LogUtils.d("start reconnect alarm");
+        LogUtils.d(TAG,LogTagConfig.LOG_TAG_POINT_SOCKET,"start reconnect alarm, reconnectTaskPeriod"+reconnectTaskPeriod);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -436,14 +455,17 @@ public class TCPConnection implements Connection {
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + period, pendingIntent);
         }
-        LogUtils.i("start alarm period is [" + TimeFormatUtil.format(period) + "]");
+        LogUtils.i(TAG,LogTagConfig.LOG_TAG_POINT_SOCKET,"start alarm period is [" + TimeFormatUtil.format(period) + "]");
     }
 
     private void cancelAlarm(PendingIntent pendingIntent) {
+        if(pendingIntent == null){
+            return;
+        }
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
         alarmed = false;
-        LogUtils.w("cancel alarm.");
+        LogUtils.w(TAG,LogTagConfig.LOG_TAG_POINT_SOCKET,"cancel alarm.");
     }
 
     private PendingIntent createPendingIntent(HostInfo hostInfo) {
@@ -458,41 +480,44 @@ public class TCPConnection implements Connection {
     }
 
     /**
-     * 根据固定算法生成连接时间间隔
+     * Socket连接失败重连 根据固定算法生成连接时间间隔
      */
     private void randomConnectPeriod() {
         int start = (int) (Math.pow(2, connectPeriodTag.get()) * 1000);
         int end = (int) (Math.pow(2, connectPeriodTag.get() + 1) * 1000);
         connectTaskPeriod = RandomUtil.getRandom(start, end);
-        if (connectTaskPeriod >= 20 * 60 * 1000) {
-            connectTaskPeriod = 20 * 60 * 1000;
+        if (connectTaskPeriod >= HeartbeatScheduler.DEFAULT_MAX_HEART * 1000) {
+            connectTaskPeriod = HeartbeatScheduler.DEFAULT_MAX_HEART * 1000;
         } else {
             connectPeriodTag.incrementAndGet();
-            LogUtils.i("to increment the connectPeriodTag:" + connectPeriodTag.get() + ",connectTaskPeriod:" + connectTaskPeriod);
+            LogUtils.i(TAG,"to increment the connectPeriodTag:" + connectPeriodTag.get() + ",connectTaskPeriod:" + connectTaskPeriod);
         }
-        LogUtils.i("connect task period is [" + TimeFormatUtil.format((long) connectTaskPeriod) + "]");
+        LogUtils.i(TAG,"connect task period is [" + TimeFormatUtil.format((long) connectTaskPeriod) + "]");
     }
 
+    /**
+     * Alarm重连
+     */
     private void randomReconnectPeriod() {
         int start = (int) (Math.pow(2, reconnectPeriodTag.get()) * 1000);
         int end = (int) (Math.pow(2, reconnectPeriodTag.get() + 1) * 1000);
         reconnectTaskPeriod = RandomUtil.getRandom(start, end);
-        if (reconnectTaskPeriod >= 20 * 60 * 1000) {
-            reconnectTaskPeriod = 20 * 60 * 1000;
+        if (reconnectTaskPeriod >= HeartbeatScheduler.DEFAULT_MAX_HEART * 1000) {
+            reconnectTaskPeriod = HeartbeatScheduler.DEFAULT_MAX_HEART * 1000;
         } else {
             reconnectPeriodTag.incrementAndGet();
-            LogUtils.i("to increment the reconnectPeriodTag:" + reconnectPeriodTag.get() + ",reconnectTaskPeriod:" + reconnectTaskPeriod);
+            LogUtils.i(TAG,"to increment the reconnectPeriodTag:" + reconnectPeriodTag.get() + ",reconnectTaskPeriod:" + reconnectTaskPeriod);
         }
-        LogUtils.i("reconnect task period is [" + TimeFormatUtil.format((long) reconnectTaskPeriod) + "]");
+        LogUtils.i(TAG,LogTagConfig.LOG_TAG_POINT_TCP,"Socket重连","reconnect task period is [" + TimeFormatUtil.format((long) reconnectTaskPeriod) + "]");
     }
 
     /**
      * 重新连接到IM服务器
      */
     private void reconnect() {
-        LogUtils.d("reconnect...");
+        LogUtils.d(TAG,LogTagConfig.LOG_TAG_FLOW_CONNECT_TCP,"Socket重连机制","重新连接到IM服务器  reconnect...");
         long lastConnectPeriod = System.currentTimeMillis() - lastConnectTime;
-        LogUtils.i("lastConnectPeriod:" + lastConnectPeriod);
+        LogUtils.i(TAG,"lastConnectPeriod:" + lastConnectPeriod);
 
         // 如果上一个主机连接断开则切换下一个主机地址进行重连
         HostInfo hostInfo = hostInfoManager.switchNextHost(canUseHostInfo);
@@ -502,6 +527,7 @@ public class TCPConnection implements Connection {
             startReconnectAlarm(hostInfo);
         } else {
             reconnectPeriodTag.set(0);
+            LogUtils.d(TAG,LogTagConfig.LOG_TAG_POINT_SOCKET,"reconnectPeriodTag set 0 ");
             connect(hostInfo.getHostname(), hostInfo.getPort(), true, null);
         }
     }
@@ -514,14 +540,18 @@ public class TCPConnection implements Connection {
     @Override
     public boolean isConnected() {
         if (socket == null) {
+            LogUtils.d(TAG,"socket is null...");
             return false;
         }
         if (socket.isClosed()) {
+            LogUtils.d(TAG,"socket is closed...");
             return false;
         }
         if (!socket.isConnected()) {
+            LogUtils.d(TAG,"socket is not connected...");
             return false;
         }
+        LogUtils.d(TAG,"socket connected is ::"+isConnected);
         return isConnected;
     }
 
@@ -537,7 +567,7 @@ public class TCPConnection implements Connection {
                 socket.close();
             }
         } catch (IOException e) {
-            LogUtils.e(e);
+            LogUtils.e(TAG+"::closeSocket",e);
         }
     }
 

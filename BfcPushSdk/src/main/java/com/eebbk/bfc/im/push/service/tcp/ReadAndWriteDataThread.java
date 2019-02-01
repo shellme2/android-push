@@ -1,9 +1,10 @@
 package com.eebbk.bfc.im.push.service.tcp;
 
+import com.eebbk.bfc.im.push.config.LogTagConfig;
 import com.eebbk.bfc.im.push.exception.WriteDataException;
 import com.eebbk.bfc.im.push.listener.OnConnectInterruptListener;
-import com.eebbk.bfc.im.push.util.LogUtils;
 import com.eebbk.bfc.im.push.tlv.TLVByteBuffer;
+import com.eebbk.bfc.im.push.util.LogUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +15,7 @@ import java.io.OutputStream;
  * 单独开一个线程用来处理数据接收和发送，在android端可能会把线程换成Service来实现以降低线程被销毁的几率
  */
 public class ReadAndWriteDataThread extends Thread {
-
+	private static final String TAG = "ReadAndWriteDataThread";
     /**
      * 网络数据读取流
      */
@@ -86,20 +87,21 @@ public class ReadAndWriteDataThread extends Thread {
 
 	@Override
 	public void run() {
+		LogUtils.d(LogTagConfig.LOG_TAG_IO,"thread run ....");
 		int readLength = 0;
 		byte[] receiveBuf = new byte[receiveBufSize];
 		TLVByteBuffer buffer = new TLVByteBuffer();
 		try {
 			while ((readLength = is.read(receiveBuf)) != -1 && run) {
 				buffer.write(receiveBuf, 0, readLength);
-				LogUtils.i("read [" + readLength + "] bytes,all buffer bytes:" + buffer.size());
+				LogUtils.e(LogTagConfig.LOG_TAG_IO,"read [" + readLength + "] bytes,all buffer bytes:" + buffer.size());
                 readBuffer(buffer);
             }
 			LogUtils.w("run:" + run + ",readLength:" + readLength);
 		} catch (IOException e) {
 			LogUtils.e(e);
             if (e instanceof InterruptedIOException) {
-                LogUtils.e("ReadAndWriteDataThread was interrupted!");
+                LogUtils.e( TAG, "ReadAndWriteDataThread was interrupted!");
             }
 		} finally {
             // 如果连接被中断，但是缓存数据已经读取了部分数据，那么就把这些数据中的完整数据包继续抛给上层sdk，尽量保证数据接收的完整性
@@ -131,7 +133,7 @@ public class ReadAndWriteDataThread extends Thread {
                 LogUtils.i("cut data[" + data.length + "] bytes,rest buffer bytes:" + buffer.size());
                 onRead(data);
             } else {
-                LogUtils.e("data read completely,but cutted tlv bytes is null or length = 0.");
+                LogUtils.e( TAG, "data read completely,but cut tlv bytes is null or length = 0.");
             }
         }
     }
@@ -140,13 +142,14 @@ public class ReadAndWriteDataThread extends Thread {
 	 * 写数据
 	 */
 	public void write(byte[] data) throws WriteDataException {
+		LogUtils.e(LogTagConfig.LOG_TAG_IO, "write: " + data);
 		try {
 			if (os != null) {
 				os.write(data);
 				os.flush();
 				onWrite(data == null ? 0 : data.length);
 			} else {
-				WriteDataException error = new WriteDataException("write data error:write outputstream is null.");
+				WriteDataException error = new WriteDataException("write data error:write out put stream is null.");
 				onWriteError(error);
 				throw error;
 			}

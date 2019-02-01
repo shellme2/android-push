@@ -6,21 +6,30 @@ import android.content.Intent;
 import android.text.TextUtils;
 
 import com.eebbk.bfc.im.push.bean.SyncMessage;
+import com.eebbk.bfc.im.push.config.LogTagConfig;
+import com.eebbk.bfc.im.push.util.JsonUtil;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.util.GsonUtil;
 
 public abstract class PushReceiver extends BroadcastReceiver {
-
+    private static final String TAG = "PushReceiver";
     @Override
     public final void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        if (TextUtils.isEmpty(action)) {
-            LogUtils.e("action is null.");
+        if (intent == null) {
+            LogUtils.e(TAG,"intent is null !!!");
             return;
         }
+        String action = intent.getAction();
+        if (TextUtils.isEmpty(action)) {
+            LogUtils.e( TAG, "action is null.");
+            return;
+        }
+
+        // TODO: 2016/10/22 simple something
         if (action.equals(SyncAction.SYNC_RESPONSE_ACTION)) {
             String data = intent.getStringExtra("data");
-            SyncMessage syncMessage = GsonUtil.fromJSON(data, SyncMessage.class);
+
+            LogUtils.e(LogTagConfig.LOG_TAG_POINT_PUSH_MSG_GET,"PushReceiver data: "+data);
+            SyncMessage syncMessage = JsonUtil.fromJson(data, SyncMessage.class);
             onMessage(context, syncMessage);
         }
     }

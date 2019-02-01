@@ -1,17 +1,20 @@
 package com.eebbk.bfc.im.push.response.handler.init;
 
-import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
+import com.eebbk.bfc.im.push.PushApplication;
+import com.eebbk.bfc.im.push.config.LogTagConfig;
 import com.eebbk.bfc.im.push.request.Request;
 import com.eebbk.bfc.im.push.response.Response;
 import com.eebbk.bfc.im.push.response.handler.SyncHandler;
+import com.eebbk.bfc.im.push.util.LogUtils;
 
 /**
  * 加密设置处理类
  */
 public class EncryptSetHandler extends SyncHandler {
 
-    public EncryptSetHandler(SyncApplication app) {
+    private static final java.lang.String TAG = "EncryptSetHandler";
+
+    public EncryptSetHandler(PushApplication app) {
         super(app);
     }
 
@@ -23,11 +26,12 @@ public class EncryptSetHandler extends SyncHandler {
 
         if (response.isSuccess()) {
             // 数据加密后开始初始化
-            LogUtils.d("data is encrypted,to init...");
+            LogUtils.d(TAG, LogTagConfig.LOG_TAG_FLOW_SET_ENCRYPT,"ResponseSuccess","set encrypt success ,then init  !!!");
+
             cancelRetry(request.getCommand());
             init(app);
         } else {
-            LogUtils.e("set encrypt error:" + response.getResponseEntity());
+            LogUtils.e(TAG, "set encrypt error:" + response.getResponseEntity());
             if (response.isPublicKeyExpire()) {
                 app.requestPublicKey(null);
             } else {
@@ -42,18 +46,18 @@ public class EncryptSetHandler extends SyncHandler {
     /**
      * 初始化
      */
-    public static void init(SyncApplication app) {
-        if (app.isRegisted()) {
-            LogUtils.d("you has registed,continue login.");
-            if(app.isLogined()){
-                // TODO: 2016/10/11 别名标签 
+    public static void init(PushApplication app) {
+        if (app.isRegistered()) {
+            if(app.isLogin()){
+                LogUtils.d(TAG, LogTagConfig.LOG_TAG_FLOW_SET_ENCRYPT,"isLogin","is login now,so just set alias and tag request  !!!");
                 app.setAliasAndTagRequest(null,null,null);
                 return;
             }
+            LogUtils.d(TAG, LogTagConfig.LOG_TAG_FLOW_SET_ENCRYPT,"isRegistered","is Registered now,so just set alias and tag request  !!!");
             app.login();
             return;
         }
-        LogUtils.d("you has not registed,to regist.");
-        app.regist();
+        LogUtils.d(TAG,LogTagConfig.LOG_TAG_FLOW_SET_ENCRYPT,"NotRegister","you has not register,to register.");
+        app.register();
     }
 }

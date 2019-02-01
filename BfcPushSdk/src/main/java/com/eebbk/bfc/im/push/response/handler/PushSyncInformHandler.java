@@ -1,12 +1,13 @@
 package com.eebbk.bfc.im.push.response.handler;
 
+import android.text.TextUtils;
+
 import com.eebbk.bfc.im.push.entity.Command;
-import com.eebbk.bfc.im.push.entity.FetchOrder;
 import com.eebbk.bfc.im.push.entity.request.push.PushSyncRequestEntity;
 import com.eebbk.bfc.im.push.entity.response.push.PushSyncInformResponseEntity;
 import com.eebbk.bfc.im.push.listener.OnReceiveFinishListener;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.request.Request;
 import com.eebbk.bfc.im.push.request.PushSyncRequest;
 import com.eebbk.bfc.im.push.response.Response;
@@ -23,11 +24,15 @@ import java.util.Queue;
  */
 public class PushSyncInformHandler extends SyncHandler {
 
+    private static String TAG = "PushSyncInformHandler";
+
+    private static final int FOLLOW = 1;
+
     private static Map<String, Queue<Response>> taskMap = new HashMap<>();
 
     private static Map<String, Boolean> lockMap = new HashMap<>();
 
-    public PushSyncInformHandler(SyncApplication app) {
+    public PushSyncInformHandler(PushApplication app) {
         super(app);
     }
 
@@ -38,10 +43,10 @@ public class PushSyncInformHandler extends SyncHandler {
     }
 
     @Override
-    public void handle(Request request, Response response) {
+    public synchronized void handle(Request request, Response response) {
         final PushSyncInformResponseEntity entity = (PushSyncInformResponseEntity) response.getResponseEntity();
         if (entity == null) {
-            LogUtils.e("entity is null");
+            LogUtils.e(TAG, "entity is null");
             return;
         }
 
@@ -49,23 +54,24 @@ public class PushSyncInformHandler extends SyncHandler {
         long informSyncKey = entity.getSyncKey();
         long serverSyncKey = syncKeyManager.getPushServerSyncKey(entity.getPkgName(), entity.getAlias());
         if (informSyncKey <= serverSyncKey) {
-            LogUtils.w("the push sync infrom has been deal,syncKey:" + informSyncKey);
+            LogUtils.w(TAG, "the push sync inform has been deal,informSyncKey::serverSyncKey=="
+                    + informSyncKey + "::" + serverSyncKey);
             return;
         }
         syncKeyManager.putPushServerSyncKey(entity.getPkgName(), entity.getAlias(), informSyncKey);
         long localSyncKey = syncKeyManager.getPushLocalSyncKey(entity.getPkgName(), entity.getAlias());
         if (informSyncKey <= localSyncKey) {
-            LogUtils.w("the local syncKey(" + localSyncKey + ") >= response syncKey(" + informSyncKey + ")");
+            LogUtils.w(TAG, "the local syncKey(" + localSyncKey + ") >= response syncKey(" + informSyncKey + ")");
             return;
         }
 
         List<Request> list = app.getRequestManager().search(Command.PUSH_SYNC_REQUEST);
-        LogUtils.i("sync inform list size:" + list.size());
+        LogUtils.i(TAG, "sync inform list size:" + list.size());
         for (Request r : list) {
             PushSyncRequestEntity pushSyncRequestEntity = (PushSyncRequestEntity) r.getRequestEntity();
-            if (pushSyncRequestEntity.getAlias().equals(entity.getAlias())
+            if (TextUtils.equals(pushSyncRequestEntity.getAlias(), entity.getAlias())
                     && pushSyncRequestEntity.getSyncKey() >= informSyncKey) {
-                LogUtils.w("the push sync inform is on deal,syncKey:" + informSyncKey);
+                LogUtils.w(TAG, "the push sync inform is on deal,syncKey:" + informSyncKey);
                 return;
             }
         }
@@ -75,7 +81,7 @@ public class PushSyncInformHandler extends SyncHandler {
             return;
         }
 
-        LogUtils.w("PushSyncInform receiver success!!!" );
+        LogUtils.w(TAG, "PushSyncInform receiver success!!!");
 
         sendPushSyncRequest(app, entity.getAlias(), localSyncKey, null);
     }
@@ -107,30 +113,37 @@ public class PushSyncInformHandler extends SyncHandler {
         lockMap.put(alias, false);
     }
 
-    private static void scheduleNext(SyncApplication app, String alias) {
+    private static void scheduleNext(PushApplication app, String alias) {
         Queue<Response> queue = taskMap.get(alias);
         if (queue == null) {
             return;
         }
 
-        Response response = null;
+        Response response;
         if ((response = queue.poll()) != null) {
             PushSyncInformResponseEntity entity = (PushSyncInformResponseEntity) response.getResponseEntity();
-            sendPushSyncRequest(app, entity.getAlias(), entity.getSyncKey(), null);
+            SyncKeyManager syncKeyManager = app.getSyncKeyManager();
+            long localSyncKey = syncKeyManager.getPushLocalSyncKey(entity.getPkgName(), entity.getAlias());
+            long informSyncKey = entity.getSyncKey();
+            if (informSyncKey <= localSyncKey) {
+                LogUtils.w(TAG, "scheduleNext the local syncKey(" + localSyncKey + ") >= response syncKey(" + informSyncKey + ")");
+                return;
+            }
+            sendPushSyncRequest(app, entity.getAlias(), localSyncKey, null);
         }
     }
 
     /**
      * 发出推送同步请求
      */
-    public static void sendPushSyncRequest(SyncApplication app, String alias, long syncKey, OnReceiveFinishListener listener) {
-        sendPushSyncRequest(app, alias, syncKey, FetchOrder.FOLLOW, 10, listener);
+    public static void sendPushSyncRequest(PushApplication app, String alias, long syncKey, OnReceiveFinishListener listener) {
+        sendPushSyncRequest(app, alias, syncKey, FOLLOW, 7, listener);
     }
 
-    public static void sendPushSyncRequest(final SyncApplication app, final String alias, long syncKey, int mode, int pageSize, final OnReceiveFinishListener listener) {
+    public static void sendPushSyncRequest(final PushApplication app, final String alias, long syncKey, int mode, int pageSize, final OnReceiveFinishListener listener) {
         lock(alias);
-        long registId = app.getmSyncRegistInfo().getRegistId();
-        PushSyncRequestEntity pushSyncRequestEntity = app.getRequestEntityFactory().createPushSyncRequestEntity(alias, syncKey, mode, pageSize, registId);
+        long registerId = app.getSyncRegisterInfo().getRegisterId();
+        PushSyncRequestEntity pushSyncRequestEntity = app.getRequestEntityFactory().createPushSyncRequestEntity(alias, syncKey, mode, pageSize, registerId);
         PushSyncRequest pushSyncRequest = new PushSyncRequest(app, pushSyncRequestEntity, new OnReceiveFinishListener() {
             @Override
             public void onFinish() {

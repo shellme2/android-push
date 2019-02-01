@@ -45,19 +45,9 @@ public interface SyncAction {
     String SYNC_CONNECT_FAIL_ACTION = TAG + ".connect_fail";
 
     /**
-     * TCP重连广播，未使用
-     */
-    String RECONNECT_ACTION = TAG + ".reconnect";
-
-    /**
      * 心跳包广播
      */
     String HEARTBEAT_REQUEST = TAG + ".heartbeat";
-
-    /**
-     * 守护广播
-     */
-    String START_ACTION = TAG + ".start";
 
     /**
      * 停止推送连接
@@ -75,6 +65,11 @@ public interface SyncAction {
     String PUSH_HOST_SERVICE_CHECK = ".push.host_service.check";
 
     /**
+     * 宿主切换更新通知
+     */
+    String PUSH_HOST_SERVICE_UPDATE = ".push.host_service.update";
+
+    /**
      * 推送相关信息搜集
      */
     String PUSH_INFO_COLLECTION = ".push.info.collection";
@@ -87,5 +82,17 @@ public interface SyncAction {
     /**
      * 重启服务
      */
-    String RESTART_SERVICE_ACTION=".wake_action";
+    String RESTART_SERVICE_ACTION=TAG+".wake_action";
+
+    String CONNECT_SWITCH_SERVICE_ACTION =TAG+".connect_switch_service";
+
+    /**
+     * 埋点服务
+     */
+    String DA_SERVICE_ACTION = TAG + ".da_service";
+
+    /**
+     * log服务
+     */
+    String LOG_SERVICE_ACTION = TAG + ".log_service";
 }

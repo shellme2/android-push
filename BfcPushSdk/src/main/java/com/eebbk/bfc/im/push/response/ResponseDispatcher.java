@@ -1,12 +1,14 @@
 package com.eebbk.bfc.im.push.response;
 
 
+import android.text.TextUtils;
+
 import com.eebbk.bfc.im.push.entity.Command;
 import com.eebbk.bfc.im.push.entity.request.push.PushSyncRequestEntity;
 import com.eebbk.bfc.im.push.entity.response.push.PushSyncFinResponseEntity;
 import com.eebbk.bfc.im.push.response.handler.init.AliasAndTagHandler;
 import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.request.Request;
 import com.eebbk.bfc.im.push.request.RequestManager;
 import com.eebbk.bfc.im.push.response.handler.ResponseHandlerProxy;
@@ -19,7 +21,7 @@ import com.eebbk.bfc.im.push.response.handler.TimeoutErrorHandler;
 import com.eebbk.bfc.im.push.response.handler.init.EncryptSetHandler;
 import com.eebbk.bfc.im.push.response.handler.init.GetPublicKeyHandler;
 import com.eebbk.bfc.im.push.response.handler.init.LoginHandler;
-import com.eebbk.bfc.im.push.response.handler.init.RegistHandler;
+import com.eebbk.bfc.im.push.response.handler.init.RegisterHandler;
 
 import java.util.List;
 
@@ -28,16 +30,18 @@ import java.util.List;
  */
 public class ResponseDispatcher {
 
-    private SyncApplication app;
+    private static final String TAG = "ResponseDispatcher";
+
+    private PushApplication app;
 
     private ResponseHandlerProxy responseHandlerProxy;
 
 
-    public ResponseDispatcher(SyncApplication app) {
+    public ResponseDispatcher(PushApplication app) {
         this.app = app;
 
         SyncHandler setAliasAndTagSyncHandler=new AliasAndTagHandler(app);
-        SyncHandler registSyncHandler = new RegistHandler(app);
+        SyncHandler registerSyncHandler = new RegisterHandler(app);
         SyncHandler loginSyncHandler = new LoginHandler(app);
         SyncHandler getPublicKeySyncHandler = new GetPublicKeyHandler(app);
         SyncHandler encryptSetSyncHandler = new EncryptSetHandler(app);
@@ -53,18 +57,18 @@ public class ResponseDispatcher {
         SyncHandler sendErrorHandler = new SendErrorHandler(app);
 
         responseHandlerProxy = new ResponseHandlerProxy();
-        responseHandlerProxy.regist(Command.PUSH_ALIAS_AND_TAG_RESPONSE, setAliasAndTagSyncHandler);
-        responseHandlerProxy.regist(Command.REGIST_RESPONSE, registSyncHandler);
-        responseHandlerProxy.regist(Command.LOGIN_RESPONSE, loginSyncHandler);
-        responseHandlerProxy.regist(Command.PUBLICKEY_RESPONSE, getPublicKeySyncHandler);
-        responseHandlerProxy.regist(Command.ENCRYPT_SET_RESPONSE, encryptSetSyncHandler);
+        responseHandlerProxy.register(Command.PUSH_ALIAS_AND_TAG_RESPONSE, setAliasAndTagSyncHandler);
+        responseHandlerProxy.register(Command.REGISTER_RESPONSE, registerSyncHandler);
+        responseHandlerProxy.register(Command.LOGIN_RESPONSE, loginSyncHandler);
+        responseHandlerProxy.register(Command.PUBLIC_KEY_RESPONSE, getPublicKeySyncHandler);
+        responseHandlerProxy.register(Command.ENCRYPT_SET_RESPONSE, encryptSetSyncHandler);
 
-        responseHandlerProxy.regist(Command.PUSH_SYNC_FIN, pushSyncFinHandler);
-        responseHandlerProxy.regist(Command.PUSH_SYNC_INFORM, pushSyncInformHandler);
-        responseHandlerProxy.regist(Command.PUSH_SYNC_RESPONSE, pushSyncResponseHandler);
+        responseHandlerProxy.register(Command.PUSH_SYNC_FIN, pushSyncFinHandler);
+        responseHandlerProxy.register(Command.PUSH_SYNC_INFORM, pushSyncInformHandler);
+        responseHandlerProxy.register(Command.PUSH_SYNC_RESPONSE, pushSyncResponseHandler);
 
-        responseHandlerProxy.regist(Command.TIMEOUT_ERROE_RESPONSE, timeoutErrorHandler);
-        responseHandlerProxy.regist(Command.SEND_ERROR_RESPONSE, sendErrorHandler);
+        responseHandlerProxy.register(Command.TIMEOUT_ERROR_RESPONSE, timeoutErrorHandler);
+        responseHandlerProxy.register(Command.SEND_ERROR_RESPONSE, sendErrorHandler);
     }
 
     public void stop() {
@@ -76,13 +80,13 @@ public class ResponseDispatcher {
      */
     public void dispatch(Response response) {
         if (response.isSuccess()) {
-            LogUtils.i("dispatch response,entity:" + response.getResponseEntity());
+            LogUtils.i(TAG,"dispatch response,entity:" + response.getResponseEntity());
         } else {
-            LogUtils.e("dispatch response,entity:" + response.getResponseEntity());
+            LogUtils.e(TAG," 看看是不是appkey和测试正式环境对应吗？dispatch response,entity:" + response.getResponseEntity());
             if (response.isTimeout()) {
                 // 超时请求就立即触发心跳包
                 app.heartbeat();
-                LogUtils.d("timeout request,trigger a heartbeat request to test the connection...");
+                LogUtils.d(TAG,"timeout request,trigger a heartbeat request to test the connection...");
             }
         }
 
@@ -93,13 +97,13 @@ public class ResponseDispatcher {
         if (request != null) {
             clearRequest(response, request, requestManager);
             if (respCommand == Command.PUSH_SYNC_RESPONSE) {
-                LogUtils.w("request is PUSH_SYNC_RESPONSE");
+                LogUtils.w(TAG,"request is PUSH_SYNC_RESPONSE");
                 dealSyncResponseAndPushResponse(request, response);
             } else {
                 dealOtherResponse(request, response);
             }
         } else {
-            LogUtils.w("request is null:" + response.getResponseEntity());
+            LogUtils.w(TAG,"request is null:" + response.getResponseEntity());
            if (respCommand == Command.PUSH_SYNC_FIN) {
                 dealPushSyncFinResponse(response, requestManager);
             }
@@ -147,19 +151,12 @@ public class ResponseDispatcher {
     }
 
     private void dealPushSyncFinResponse(Response response, RequestManager requestManager) {
-        LogUtils.d("dealPushSyncFinResponse...");
+        LogUtils.d(TAG,"deal PushSyncFinResponse...");
         PushSyncFinResponseEntity pushSyncFinResponseEntity = (PushSyncFinResponseEntity) response.getResponseEntity();
         List<Request> requests = requestManager.search(Command.PUSH_SYNC_REQUEST);
-//        LogUtils.d("dealPushSyncFinResponse  requests=="+requests.size());
         for (Request req : requests) {
             PushSyncRequestEntity pushSyncRequestEntity = (PushSyncRequestEntity) req.getRequestEntity();
-
-//            LogUtils.d("dealPushSyncFinResponse  pushSyncRequestEntity.getAlias()=="+pushSyncRequestEntity.getAlias());
-//            LogUtils.d("dealPushSyncFinResponse  pushSyncFinResponseEntity.getAlias()=="+pushSyncFinResponseEntity.getAlias());
-//            LogUtils.d("dealPushSyncFinResponse  pushSyncRequestEntity.getSyncKey()=="+pushSyncRequestEntity.getSyncKey());
-//            LogUtils.d("dealPushSyncFinResponse  pushSyncFinResponseEntity.getSyncKey()=="+pushSyncFinResponseEntity.getSyncKey());
-
-            if (pushSyncRequestEntity.getAlias().equals(pushSyncFinResponseEntity.getAlias())
+            if (TextUtils.equals(pushSyncRequestEntity.getAlias(), pushSyncFinResponseEntity.getAlias())
                     && pushSyncRequestEntity.getSyncKey() <= pushSyncFinResponseEntity.getSyncKey()) {
                 requestManager.remove(req);
             }

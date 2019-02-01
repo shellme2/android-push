@@ -4,7 +4,7 @@ public interface StatusCode {
 
     int SEND_SUCCESS = 0;
     int CONNECT_ERROR = 1;
-    int WRITEDATA_ERROR = 2;
+    int WRITE_DATA_ERROR = 2;
     int DATA_SEND_NULL_ERROR = 3;
     int REMOTE_ERROR = 4;
     int SEND_WAITING = 5;

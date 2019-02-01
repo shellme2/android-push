@@ -5,7 +5,7 @@ import com.eebbk.bfc.im.push.anotation.TagValue;
 import com.eebbk.bfc.im.push.entity.Command;
 import com.eebbk.bfc.im.push.entity.request.RequestEntity;
 
-@CommandValue(Command.TIMEOUT_ERROE_RESPONSE)
+@CommandValue(Command.TIMEOUT_ERROR_RESPONSE)
 public class TimeoutErrorResponseEntity extends ResponseEntity {
 
     @TagValue(1)

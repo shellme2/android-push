@@ -7,25 +7,13 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class DesEncryptUtil {
 
-//    private static final String TAG=DesEncryptUtil.class.getName();
     private static final String DES_KEY="<Yb0AzXu";
 
-//    static {
-//        System.loadLibrary("GetDesKey");
-//    }
-
     private DesEncryptUtil(){}
-
-//    public static native String getDesKey();
 
     public static String encrypt(String content) {
         String encryptedString = null;
         try {
-//            //初始化密钥
-//            String encKey = getDesKey();
-
-//            LogUtils.d(TAG,"encKey=="+encKey);
-
             SecretKeySpec keySpec = new SecretKeySpec(DES_KEY.getBytes("utf-8"), "DES");
             //选择使用 DES 算法，ECB 方式，填充方式为 PKCS5Padding
             Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
@@ -42,8 +30,6 @@ public class DesEncryptUtil {
     public static String decrypt(String encryptStr) {
         String decryptedString = null;
         try {
-//            //初始化密钥
-//            String encKey = getDesKey();
             SecretKeySpec keySpec = new SecretKeySpec(DES_KEY.getBytes("utf-8"), "DES");
             //选择使用 DES 算法，ECB 方式，填充方式为 PKCS5Padding
             Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");

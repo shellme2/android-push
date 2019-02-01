@@ -24,7 +24,7 @@ public class StringUtils {
         return builder.toString();
     }
 
-    public static List<String> stringtoList(String str){
+    public static List<String> stringToList(String str){
         if(TextUtils.isEmpty(str)){
             return null;
         }

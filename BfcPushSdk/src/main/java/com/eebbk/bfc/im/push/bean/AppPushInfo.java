@@ -1,8 +1,10 @@
 package com.eebbk.bfc.im.push.bean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
-public class AppPushInfo {
+public class AppPushInfo implements Parcelable{
 
     private String pkgName;
 
@@ -11,6 +13,27 @@ public class AppPushInfo {
     public AppPushInfo(String pkgName) {
         this.pkgName = pkgName;
     }
+
+    protected AppPushInfo(Parcel in) {
+        pkgName = in.readString();
+        if (in.readByte() == 0) {
+            ridTag = null;
+        } else {
+            ridTag = in.readInt();
+        }
+    }
+
+    public static final Creator<AppPushInfo> CREATOR = new Creator<AppPushInfo>() {
+        @Override
+        public AppPushInfo createFromParcel(Parcel in) {
+            return new AppPushInfo(in);
+        }
+
+        @Override
+        public AppPushInfo[] newArray(int size) {
+            return new AppPushInfo[size];
+        }
+    };
 
     public String getPkgName() {
         return pkgName;
@@ -43,11 +66,27 @@ public class AppPushInfo {
         return false;
     }
 
-    @Override
+ /*   @Override
     public String toString() {
         return "AppPushInfo{" +
                 "pkgName='" + pkgName + '\'' +
                 ", ridTag=" + ridTag +
                 '}';
+    }*/
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(pkgName);
+        if (ridTag == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(ridTag);
+        }
     }
 }

@@ -5,18 +5,18 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.entity.Command;
-import com.eebbk.bfc.im.push.util.LogUtils;
-import com.eebbk.bfc.im.push.SyncApplication;
 import com.eebbk.bfc.im.push.request.Request;
 import com.eebbk.bfc.im.push.response.Response;
+import com.eebbk.bfc.im.push.util.LogUtils;
 import com.eebbk.bfc.im.push.util.NetUtil;
 
 import java.lang.reflect.Field;
 
 public abstract class SyncHandler {
-
-    protected SyncApplication app;
+    private static final String TAG = "SyncHandler";
+    protected PushApplication app;
 
     protected static Looper retryLooper;
 
@@ -48,11 +48,11 @@ public abstract class SyncHandler {
                     }
                 }
             }
-            LogUtils.e("retry error,msg what is wrong...");
+            LogUtils.e( TAG,"retry error,msg what is wrong...");
         }
     }
 
-    public SyncHandler(SyncApplication app) {
+    public SyncHandler(PushApplication app) {
         LogUtils.i("create sync handler:" + this.getClass().getSimpleName());
         this.app = app;
         if (retryHandler == null) {
@@ -88,7 +88,7 @@ public abstract class SyncHandler {
         request.setOnRetry(true);
         if (!NetUtil.isConnectToNet(app.getContext())) {
             // 如果没联网就不进行重试操作
-            LogUtils.e("Network is unreachable,do not retry send request:" + request.getRequestEntity());
+            LogUtils.e( TAG," Network is unreachable,do not retry send request:" + request.getRequestEntity());
             request.setOnRetry(false);
             return;
         }

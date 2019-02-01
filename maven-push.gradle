@@ -1,0 +1,190 @@
+apply plugin: 'maven'
+
+/*
+本配置引用其他配置文件参数，具体配置如下：
+1. 在主项目增加config.gradle文件，并增加以下属性：
+ext {
+    //此值代表当前编译分支，主要用来控制打包后aar上传到私有maven仓库的哪个地址，请勿改动，将有Jenkins构建任务自动修改
+    // 仓库分为测试、灰度、正式三个仓库，如果编译分支不为master，都上传到测试仓库
+    // 如果编译分支为master，以后缀-beta结尾的都上传到测试仓库，-rc的上传到灰度仓库，不含有-beta、-rc后缀的才会上传到正式仓库
+    BUILD_BRANCH_NAME='develop'
+
+    VERSION_NAME='0.0.1'
+}
+
+2. 在主项目的build.gradle增加以下两行导入配置文件：
+    apply from: "http://172.28.2.93/bfc/Bfc/raw/master/common-config/bfc-config.gradle"
+    apply from: "config.gradle"
+
+3. 在library目录新增gradle.properties文件，并添加以下内容：
+    # library name，这里填你的库名
+    POM_NAME=Bfc Download Library
+    # library artifact id,这里填你的库文件名称
+    POM_ARTIFACT_ID=bfc-download
+    # library packaging type
+    POM_PACKAGING=aar
+
+4. 引用参数清单
+config.gradle文件中：
+VERSION_NAME
+
+bfc-config.gradle中：
+bfcBuildConfig.MAVEN_URL
+bfcBuildConfig.MAVEN_SNAPSHOT_URL
+bfcBuildConfig.NEXUS_USERNAME
+bfcBuildConfig.NEXUS_PASSWORD
+bfcBuildConfig.POM_GROUP_ID
+bfcBuildConfig.POM_DESCRIPTION
+bfcBuildConfig.POM_INCEPTION_YEAR
+bfcBuildConfig.POM_SCM_URL
+bfcBuildConfig.POM_SCM_CONNECTION
+bfcBuildConfig.POM_SCM_DEV_CONNECTION
+bfcBuildConfig.POM_LICENCE_COMMENTS
+bfcBuildConfig.POM_LICENCE_NAME
+bfcBuildConfig.POM_LICENCE_URL
+bfcBuildConfig.POM_LICENCE_DIST
+bfcBuildConfig.POM_DEVELOPER_ID
+bfcBuildConfig.POM_DEVELOPER_NAME
+bfcBuildConfig.POM_DEVELOPER_EMAIL
+bfcBuildConfig.POM_DEVELOPER_URL
+bfcBuildConfig.POM_ISSUE_MANAGEMENT_SYSTEM
+bfcBuildConfig.POM_ISSUE_MANAGEMENT_URL
+
+gradle.properties文件中：
+POM_NAME
+POM_ARTIFACT_ID
+POM_PACKAGING
+
+*/
+
+def isRcBuild() {
+    return VERSION_NAME.contains("-rc") == true
+}
+
+def isBetaBuild() {
+    return VERSION_NAME.contains("-beta") == true
+}
+
+def getRepositoryUrl() {
+    def uploadMavenUrl = bfcBuildConfig.MAVEN_SNAPSHOT_URL
+    if("master".equals(BUILD_BRANCH_NAME)){
+        uploadMavenUrl = isBetaBuild() ? bfcBuildConfig.MAVEN_SNAPSHOT_URL : (isRcBuild() ? bfcBuildConfig.MAVEN_RC_URL : bfcBuildConfig.MAVEN_URL)
+    }
+
+    println " upload aar Branch:" + BUILD_BRANCH_NAME + "\n Maven Url:" + uploadMavenUrl + "\n Library Name:" + POM_ARTIFACT_ID + "\n Version:" + VERSION_NAME
+    return uploadMavenUrl
+}
+
+def getRepositoryUsername() {
+    return bfcBuildConfig.NEXUS_USERNAME
+}
+def getRepositoryPassword() {
+    return bfcBuildConfig.NEXUS_PASSWORD
+}
+
+afterEvaluate { project ->
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                configurePOM(pom)
+
+                repository(url: getRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+            }
+        }
+    }
+
+    task androidJavadocs(type: Javadoc) {
+        failOnError false
+        options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('encoding', 'UTF-8')
+        options.addStringOption('charSet', 'UTF-8')
+        source = android.sourceSets.main.java.srcDirs
+        //ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
+
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+        classifier = 'javadoc'
+        from androidJavadocs.destinationDir
+    }
+
+    task androidSourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.sourceFiles
+    }
+
+    task apklib(type: Zip) {
+        appendix = extension = 'apklib'
+        from 'AndroidManifest.xml'
+        into('res') {
+            from 'res'
+        }
+        into('src') {
+            from 'src'
+        }
+    }
+
+    artifacts {
+        archives androidSourcesJar
+        archives androidJavadocsJar
+        archives file("./build/outputs/aar/" + POM_ARTIFACT_ID + "-" + VERSION_NAME + ".aar")
+//        archives file(POM_ARTIFACT_ID + "-" + VERSION_NAME + ".pom")
+        //archives apklib
+        //archives file("./build/outputs/libs/" + POM_ARTIFACT_ID + "-" + VERSION_NAME + ".jar")
+    }
+}
+
+private configurePOM(def pom) {
+    pom.project {
+        groupId bfcBuildConfig.POM_GROUP_ID
+        artifactId POM_ARTIFACT_ID
+        version VERSION_NAME
+        name POM_NAME
+        packaging POM_PACKAGING
+        description bfcBuildConfig.POM_DESCRIPTION
+        url bfcBuildConfig.POM_URL
+        inceptionYear bfcBuildConfig.POM_INCEPTION_YEAR
+
+        scm {
+            url bfcBuildConfig.POM_SCM_URL
+            connection bfcBuildConfig.POM_SCM_CONNECTION
+            developerConnection bfcBuildConfig.POM_SCM_DEV_CONNECTION
+        }
+
+        licenses {
+            license {
+                name bfcBuildConfig.POM_LICENCE_NAME
+                url bfcBuildConfig.POM_LICENCE_URL
+                distribution bfcBuildConfig.POM_LICENCE_DIST
+                comments bfcBuildConfig.POM_LICENCE_COMMENTS
+            }
+        }
+
+        developers {
+            developer {
+                id bfcBuildConfig.POM_DEVELOPER_ID
+                name bfcBuildConfig.POM_DEVELOPER_NAME
+                email bfcBuildConfig.POM_DEVELOPER_EMAIL
+                url bfcBuildConfig.POM_DEVELOPER_URL
+            }
+        }
+
+        issueManagement {
+            system bfcBuildConfig.POM_ISSUE_MANAGEMENT_SYSTEM
+            url bfcBuildConfig.POM_ISSUE_MANAGEMENT_URL
+        }
+    }
+    //The publication doesn't know about our dependencies, so we have to manually add them to the pom
+    pom.withXml {
+        def dependenciesNode = asNode().appendNode('dependencies')
+        //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+        configurations.compile.allDependencies.each {
+            def dependencyNode = dependenciesNode.appendNode('dependency')
+            dependencyNode.appendNode('groupId', it.group)
+            dependencyNode.appendNode('artifactId', it.name)
+            dependencyNode.appendNode('version', it.version)
+        }
+    }
+}

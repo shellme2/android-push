@@ -1,7 +1,7 @@
 package com.eebbk.bfc.im.push.util;
 
 import com.eebbk.bfc.im.push.entity.response.ResponseEntity;
-import com.eebbk.bfc.im.push.SyncApplication;
+import com.eebbk.bfc.im.push.PushApplication;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,13 +25,12 @@ public class IDUtil {
 	//构造函数私有，防止恶意新建
 	private IDUtil(){}
 
-	public static void init(SyncApplication app) {
+	public static void init(PushApplication app) {
         ridTag = app.getPlatform().getDevice().getRidTagFromMetaData();
 	}
 
 	/**
 	 * 获得一个UUID
-	 * @return
 	 */
 	public static String getUUID() {
 		String uuid = UUID.randomUUID().toString();
@@ -40,7 +39,6 @@ public class IDUtil {
 
 	/**
 	 * RID(序流水号)
-	 * @return
 	 */
 	public static int getRID() {
         if (increaseRID.get() >= RID_COUNT) { //上限为一万
@@ -51,9 +49,6 @@ public class IDUtil {
 
 	/**
 	 * 检测app的Rid前缀，true表示为当前app的rid前缀，false表示不是当前app的rid前缀
-	 *
-	 * @param rid
-	 * @return
 	 */
 	public static boolean checkRidTag (int rid) {
 		int check = rid / RID_BASE;

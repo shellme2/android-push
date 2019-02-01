@@ -2,6 +2,8 @@ package com.eebbk.bfc.im.push.tlv;
 
 /**
  * TLV编码int和byte[]转换方式
+ * <p/>
+ * Created by lhd on 2015/09/26.
  */
 public class TLVUtils {
 
@@ -31,7 +33,7 @@ public class TLVUtils {
             int ch2 = bytes[1] & 0xff;
             int ch3 = bytes[2] & 0xff;
             int ch4 = bytes[3] & 0xff;
-            result = (int) ((ch1 << 24) | (ch2 << 16) | (ch3 << 8) | (ch4 << 0));
+            result = (ch1 << 24) | (ch2 << 16) | (ch3 << 8) | (ch4 << 0);
         } else if (len == 8) {
             long ch1 = bytes[0] & 0xff;
             long ch2 = bytes[1] & 0xff;

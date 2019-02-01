@@ -1,0 +1,109 @@
+apply plugin: 'com.android.library'
+
+def gitHead = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+def gitTag = 'git describe --tags'.execute([], project.rootDir).text.trim()
+def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+
+android {
+
+    compileSdkVersion bfcBuildConfig.compileSdkVersion
+    buildToolsVersion bfcBuildConfig.buildToolsVersion
+
+    lintOptions {
+        abortOnError false
+    }
+
+    //publishNonDefault true
+
+    defaultConfig {
+        minSdkVersion bfcBuildConfig.minSdkVersion
+        targetSdkVersion bfcBuildConfig.targetSdkVersion
+        versionCode VERSION_CODE as int
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "GIT_HEAD", "\"${gitHead}\""
+        buildConfigField "String", "GIT_TAG", "\"${gitTag}\""
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    productFlavors {
+        /*im{
+            buildConfigField "String", "LIBRARY_NAME", "\"${POM_ARTIFACT_ID_IM}\""
+        }*/
+        common{
+            buildConfigField "String", "LIBRARY_NAME", "\"${POM_ARTIFACT_ID_COMMON}\""
+        }
+    }
+
+    task makeCommon(type: Copy){
+        println " =============== make common ==============="
+        //im
+        /*from('build/outputs/aar/BfcPushSdk-im-release.aar')
+        into('build/outputs/aar/')*/
+
+        //common
+        from('build/outputs/aar/BfcPushSdk-common-release.aar')
+        into('build/outputs/aar/')
+
+        //rename
+        //rename('BfcPushSdk-im-release.aar', POM_ARTIFACT_ID + "-" + VERSION_NAME + ".aar")
+        rename('BfcPushSdk-common-release.aar', POM_ARTIFACT_ID + "-" + VERSION_NAME + ".aar")
+        //rename('BfcPushSdk-common-release.aar', POM_ARTIFACT_ID_COMMON + ".aar")
+    }
+    makeCommon.dependsOn("build")
+
+    tasks.whenTaskAdded { theTask ->
+        if (theTask.name.equals("uploadArchives")) {
+            theTask.dependsOn "makeCommon"
+        }
+    }
+
+
+}
+
+//apply from:"http://172.28.2.93/bfc/Bfc/raw/develop/common-config/maven-push.gradle"
+apply from:"../maven-push.gradle"
+dependencies {
+    commonCompile fileTree(include: ['*.jar'], dir: 'libs')
+    // 从网络配置导入第三方library或者其他bfc库
+    compile bfcBuildConfig.deps["support-annotations"]
+    compile bfcBuildConfig.deps["bfc-log"]
+    compile bfcBuildConfig.deps["bfc-sequencetools-json"]
+    //    compile bfcBuildConfig.deps["bfc-download"]
+    compile bfcBuildConfig.deps["bfc-common"]
+    compile bfcBuildConfig.deps["bfc-behavior-aidl"]
+
+    // test
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile bfcBuildConfig.deps["junit"]
+}
+
+
+

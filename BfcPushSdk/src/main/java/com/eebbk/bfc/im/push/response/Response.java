@@ -1,8 +1,8 @@
 package com.eebbk.bfc.im.push.response;
 
+import com.eebbk.bfc.im.push.PushApplication;
 import com.eebbk.bfc.im.push.entity.Command;
 import com.eebbk.bfc.im.push.entity.response.ResponseEntity;
-import com.eebbk.bfc.im.push.SyncApplication;
 
 /**
  * 请求响应基类
@@ -39,9 +39,9 @@ public class Response {
          */
         int SUCCESS = 200;
 
-        int UNKNOW_REGISTID = 3200;
+        int UN_KNOW_REGISTER_ID = 3200;
 
-        int REGIST_TOKEN_INVALID = 4200;
+        int REGISTER_TOKEN_INVALID = 4200;
 
         int PUBLICKEY_EXPIRE = 5200;
 
@@ -50,9 +50,9 @@ public class Response {
 
     private ResponseEntity responseEntity;
 
-    private SyncApplication app;
+    private PushApplication app;
 
-    public Response(SyncApplication app, ResponseEntity responseEntity) {
+    public Response(PushApplication app, ResponseEntity responseEntity) {
         this.app = app;
         this.responseEntity = responseEntity;
     }
@@ -90,25 +90,24 @@ public class Response {
         return responseEntity.getCode() == Code.SUCCESS;
     }
 
-    public boolean isRegistTokenInvalid() {
+    public boolean isRegisterTokenInvalid() {
         int command = responseEntity.getCommand();
         if (command == Command.LOGIN_RESPONSE) {
-            return responseEntity.getCode() == Code.REGIST_TOKEN_INVALID;
+            return responseEntity.getCode() == Code.REGISTER_TOKEN_INVALID;
         }
         return false;
     }
 
-    public boolean isUnknowRegistId() {
+    public boolean isUnKnowRegisterId() {
         int command = responseEntity.getCommand();
         if (command == Command.LOGIN_RESPONSE) {
-            return responseEntity.getCode() == Code.UNKNOW_REGISTID;
+            return responseEntity.getCode() == Code.UN_KNOW_REGISTER_ID;
         }
         return false;
     }
 
     /**
      * 公钥过期
-     * @return
      */
     public boolean isPublicKeyExpire() {
         int command = responseEntity.getCommand();

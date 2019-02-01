@@ -3,11 +3,11 @@ package com.eebbk.bfc.im.push.bean;
 import android.content.Context;
 import android.os.Build;
 
-import com.eebbk.bfc.im.push.version.VersionConfig;
+import com.eebbk.bfc.im.push.SDKVersion;
 import com.eebbk.bfc.im.push.service.host.httpdns.HttpDnsClient;
 import com.eebbk.bfc.im.push.service.host.HostInfoManager;
 import com.eebbk.bfc.im.push.util.DateFormatUtil;
-import com.eebbk.bfc.im.push.util.GsonUtil;
+import com.eebbk.bfc.im.push.util.JsonUtil;
 import com.eebbk.bfc.im.push.util.NetUtil;
 import com.eebbk.bfc.im.push.util.TimeFormatUtil;
 
@@ -73,7 +73,7 @@ public class PushCollectInfo {
     /**
      * 设备登录状态
      */
-    private boolean pushLogined;
+    private boolean pushLogin;
 
     /**
      * 网络连接状态
@@ -115,8 +115,8 @@ public class PushCollectInfo {
 
     public PushCollectInfo() {
         this.hostInfoStr = HostInfoManager.getInstance().toString();
-        this.sdkVersionCode = VersionConfig.VERSION_CODE;
-        this.sdkVersionName = VersionConfig.VERSION_NAME;
+        this.sdkVersionCode = SDKVersion.getSDKInt();
+        this.sdkVersionName = SDKVersion.getVersionName();
         this.deviceInfo = Build.MANUFACTURER + " " + Build.MODEL + " " + Build.VERSION.RELEASE;
         this.recordTime = System.currentTimeMillis();
         this.recortTimeFormat = DateFormatUtil.format(DateFormatUtil.FORMAT_1, recordTime);
@@ -271,12 +271,12 @@ public class PushCollectInfo {
         this.pushConnected = pushConnected;
     }
 
-    public boolean isPushLogined() {
-        return pushLogined;
+    public boolean isPushLogin() {
+        return pushLogin;
     }
 
-    public void setPushLogined(boolean pushLogined) {
-        this.pushLogined = pushLogined;
+    public void setPushLogin(boolean pushLogin) {
+        this.pushLogin = pushLogin;
     }
 
     public boolean isNetConnected() {
@@ -385,6 +385,6 @@ public class PushCollectInfo {
 
     @Override
     public String toString() {
-        return GsonUtil.toJSON(this);
+        return JsonUtil.toJson(this);
     }
 }

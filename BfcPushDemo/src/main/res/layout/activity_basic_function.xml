@@ -1,0 +1,98 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/init_btn"
+        style="@style/BasicBtnItemStyle"
+        android:text="@string/init_interface" />
+    <Switch
+        android:id="@+id/switch_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:textOff="正式环境"
+        android:textOn="测试环境"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_consuming" />
+        <TextView
+            android:id="@+id/init_time_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textColor="@android:color/holo_red_dark" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/result"/>
+        <TextView
+            android:id="@+id/init_result_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/holo_red_dark"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_marginTop="10dp"
+        android:background="#ff000000"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/default_btn"
+            style="@style/BasicBtnItemStyle"
+            android:text="@string/default_flow"/>
+        <Button
+            android:id="@+id/custom_btn"
+            style="@style/BasicBtnItemStyle"
+            android:text="@string/custom_flow"/>
+        <Button
+            android:id="@+id/interface_btn"
+            style="@style/BasicBtnItemStyle"
+            android:text="@string/interface_test"/>
+        <Button
+            android:id="@+id/function_btn"
+            style="@style/BasicBtnItemStyle"
+            android:text="@string/function_test"/>
+        <Button
+            android:id="@+id/analyze_btn"
+            style="@style/BasicBtnItemStyle"
+            android:text="Push分析"/>
+    </LinearLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_marginTop="20dp"
+        android:padding="10dp"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/analyze_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </ScrollView>
+</LinearLayout>
